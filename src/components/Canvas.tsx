@@ -75,6 +75,8 @@ const Canvas = ({
   } = useContext(AppContext)!;
   if (!image) return null;
 
+  console.log('scale', scale);
+
   const MAX_CANVAS_AREA = 1677721;
   const w = scale!.width;
   const h = scale!.height;

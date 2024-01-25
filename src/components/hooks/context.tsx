@@ -54,6 +54,11 @@ const AppContextProvider = (props: {
   );
   const [isAllAnimationDone, setIsAllAnimationDone] = useState<boolean>(false);
   const [isToolBarUpload, setIsToolBarUpload] = useState<boolean>(false);
+  const [holds, setHolds] = useState<{ svgStr: string; type: string }[]>([]);
+  const [holdTypeSelected, setHoldTypeSelected] = useState<{ id: number; color: string }>({
+    id: 0,
+    color: "#ff1717",
+  });
 
   return (
     <AppContext.Provider
@@ -92,6 +97,8 @@ const AppContextProvider = (props: {
         predMasksHistory: [predMasksHistory, setPredMasksHistory],
         isAllAnimationDone: [isAllAnimationDone, setIsAllAnimationDone],
         isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
+        holds: [holds, setHolds],
+        holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
       }}
     >
       {props.children}

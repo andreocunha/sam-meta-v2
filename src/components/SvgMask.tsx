@@ -21,6 +21,7 @@ const SvgMask = ({
     isErasing: [isErasing, setIsErasing],
     svg: [svg],
     isMultiMaskMode: [isMultiMaskMode, setIsMultiMaskMode],
+    holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
   } = useContext(AppContext)!;
   const [key, setKey] = useState(Math.random());
   const [boundingBox, setBoundingBox] = useState<DOMRect | undefined>(
@@ -31,7 +32,10 @@ const SvgMask = ({
     if (!pathRef?.current) return;
     setBoundingBox(pathRef.current.getBBox());
   };
-  const [allSvg, setAllSvg] = useState<string[]>([]);
+  const [allSvg, setAllSvg] = useState<{
+    svg: string;
+    color: string;
+  }[] | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -42,19 +46,47 @@ const SvgMask = ({
   }, [svg]);
 
   useEffect(() => {
-    console.log("svgStr", svgStr);
     if (svgStr) {
-      // split svgStr into multiple paths by M, but keep the M
       const splitSvgStr = svgStr.split(/(?=M)/g);
-      // remove all empty strings
       const filteredSvgStr = splitSvgStr.filter((str) => str);
-      setAllSvg(filteredSvgStr);
+      const lastSvg = filteredSvgStr[filteredSvgStr.length - 1]; // pegando o último SVG
+  
+      setAllSvg((currentAllSvg) => {
+        // Se não existir nenhum SVG, inicializa o allSvg
+        if (!currentAllSvg || currentAllSvg.length === 0) {
+          return lastSvg ? [{ svg: lastSvg, color: holdTypeSelected.color }] : [];
+        }
+  
+        // Verificando se o último SVG já existe em allSvg
+        const existingIndex = currentAllSvg.findIndex(item => item.svg === lastSvg);
+  
+        if (existingIndex === -1) {
+          // Se o último SVG é novo, adicione-o com a cor atual
+          return [...currentAllSvg, { svg: lastSvg, color: holdTypeSelected.color }];
+        } else if (filteredSvgStr.length < currentAllSvg.length) {
+          // Se há menos SVGs em filteredSvgStr do que em allSvg, um SVG foi removido
+          // Remova o último SVG de allSvg
+          const newAllSvg = currentAllSvg.slice(0, -1);
+          return newAllSvg;
+        }
+  
+        // Se não houver mudanças no número de SVGs, retorne o allSvg atual
+        return currentAllSvg;
+      });
     }
-  }, [svgStr]);
+  }, [svgStr]); // Removendo holdTypeSelected.color da lista de dependências
+  
+  
+  
+  
 
   useEffect(() => {
     console.log("allSvg", allSvg);
   }, [allSvg]);
+
+  useEffect(() => { 
+    console.log("holdTypeSelected", holdTypeSelected);
+  }, [holdTypeSelected]);
 
   const bbX = boundingBox?.x;
   const bbY = boundingBox?.y;
@@ -62,7 +94,7 @@ const SvgMask = ({
   const bbHeight = boundingBox?.height;
   const bbMiddleY = bbY && bbHeight && bbY + bbHeight / 2;
   const bbWidthRatio = bbWidth && bbWidth / xScale;
-  const colors = ['#399198', '#5a18e4', '#eb199f', '#dd32f5', '#47bc50', '#1463cf', '#b32bfd', '#a5e055', '#92e9bf', '#1e0cd5'];
+  const colors = ['#ff1717', '#1717ff' ,'#ffff17'];
 
 
   return (
@@ -105,7 +137,7 @@ const SvgMask = ({
         <path d={svgStr} />
       </clipPath>
       {colors?.map((color, index) => (
-        <filter id={`glow-${index}`} x="-50%" y="-50%" width="200%" height="200%">
+        <filter id={`glow-${color}`} x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={color} />
           <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={color} />
         </filter>
@@ -137,15 +169,15 @@ const SvgMask = ({
             <path
               id={`mask-path-${index}`}
               className="mask-path"
-              d={path}
+              d={path.svg}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeOpacity="1"
               fillOpacity="0"
-              stroke={colors[index % colors.length]}
+              stroke={path.color}
               strokeWidth="2"
               ref={pathRef}
-              filter={`url(#glow-${index % colors.length})`}
+              filter={`url(#glow-${path.color})`}
             />
           ))}
         </>

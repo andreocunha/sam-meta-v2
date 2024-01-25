@@ -43,24 +43,15 @@ const SegmentDrawer = ({
   handleSelectedImage,
 }: SegmentDrawerProps) => {
   const {
-    isModelLoaded: [isModelLoaded, setIsModelLoaded],
     segmentTypes: [segmentTypes, setSegmentTypes],
-    isLoading: [isLoading, setIsLoading],
-    isErased: [isErased, setIsErased],
-    isMultiMaskMode: [isMultiMaskMode, setIsMultiMaskMode],
-    stickers: [stickers, setStickers],
     activeSticker: [activeSticker, setActiveSticker],
     didShowAMGAnimation: [didShowAMGAnimation, setDidShowAMGAnimation],
-    isAllAnimationDone: [isAllAnimationDone, setIsAllAnimationDone],
     isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
+    holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
   } = useContext(AppContext)!;
 
   const [uploadClick, setUploadClick] = useState<boolean>(true);
   const [visibleClickHover, setVisibleClickHover] = useState<boolean>(false);
-  const [visibleBoxHover, setVisibleBoxHover] = useState<boolean>(false);
-  const [visibleAllHover, setVisibleAllHover] = useState<boolean>(false);
-  const [visibleStickerHover, setVisibleStickerHover] =
-    useState<boolean>(false);
   const [isCutOut, setIsCutOut] = useState<boolean>(false);
   const handleStickerClick = (i: number) => {
     setActiveSticker(i);
@@ -220,7 +211,58 @@ const SegmentDrawer = ({
                 Click em uma garra ou mais para seleciona-las.
               </p>
             )}
-            
+
+            <div className="flex flex-row w-full justify-between">
+                {/* 3 buttons to holdTypeSelected, red, blue and yellow */}
+                <button
+                    style={{
+                        backgroundColor: "#ff1717",
+                        borderRadius: "50%",
+                        width: "30px",
+                        height: "30px",
+                        border: holdTypeSelected.color === "#ff1717" ? "3px solid #878686" : "none",
+                        outline: "none",
+                        cursor: "pointer",
+                        transform: holdTypeSelected.color === "#ff1717" ? "scale(1.2)" : "none"
+                    }}
+                    onClick={() => {
+                        setHoldTypeSelected({ id: 0, color: "#ff1717" });
+                    }}
+                ></button>
+                <button
+                    style={{
+                        backgroundColor: "#1717ff",
+                        borderRadius: "50%",
+                        width: "30px",
+                        height: "30px",
+                        border: holdTypeSelected.color === "#1717ff" ? "3px solid #878686" : "none",
+                        outline: "none",
+                        cursor: "pointer",
+                        transform: holdTypeSelected.color === "#1717ff" ? "scale(1.2)" : "none"
+                    }}
+                    onClick={() => {
+                        setHoldTypeSelected({ id: 1, color: "#1717ff" });
+                    }}
+                ></button>
+                <button
+                    style={{
+                        backgroundColor: "#ffff17",
+                        borderRadius: "50%",
+                        width: "30px",
+                        height: "30px",
+                        border: holdTypeSelected.color === "#ffff17" ? "3px solid #878686" : "none",
+                        outline: "none",
+                        cursor: "pointer",
+                        transform: holdTypeSelected.color === "#ffff17" ? "scale(1.2)" : "none"
+                    }}
+                    onClick={() => {
+                        setHoldTypeSelected({ id: 2, color: "#ffff17" });
+                    }}
+                ></button>
+            </div>
+
+
+                        
             {segmentTypes === "Click" && (
               <SegmentOptions
                 handleResetInteraction={handleResetInteraction}

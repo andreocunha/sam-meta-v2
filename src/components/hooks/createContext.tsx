@@ -128,6 +128,21 @@ interface contextProps {
     isToolBarUpload: boolean,
     setIsToolBarUpload: React.Dispatch<React.SetStateAction<boolean>>
   ];
+  // save the holds, the hold has svgStr and type
+  holds: [
+    holds: { svgStr: string; type: string }[],
+    setHolds: React.Dispatch<
+      React.SetStateAction<{ svgStr: string; type: string }[]>
+    >
+  ];
+  // holds type selected (number and string) for id and color hex
+  holdTypeSelected: [
+    holdTypeSelected: { id: number; color: string },
+    setHoldsTypeSelected: React.Dispatch<
+      React.SetStateAction<{ id: number; color: string }>
+    >
+  ];
+  
 }
 
 const AppContext = createContext<contextProps | null>(null);
