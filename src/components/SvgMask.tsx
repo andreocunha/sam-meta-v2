@@ -47,6 +47,7 @@ const SvgMask = ({
 
   useEffect(() => {
     if (svgStr) {
+      console.log("svgStr", svgStr);
       const splitSvgStr = svgStr.split(/(?=M)/g);
       const filteredSvgStr = splitSvgStr.filter((str) => str);
       const lastSvg = filteredSvgStr[filteredSvgStr.length - 1]; // pegando o último SVG
