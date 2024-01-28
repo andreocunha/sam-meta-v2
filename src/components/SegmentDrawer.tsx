@@ -129,9 +129,6 @@ const SegmentDrawer = ({
 
   return (
     <section className="absolute top-0 left-0 z-30 flex-col flex w-full lg:w-72 overflow-y-auto bg-white"
-    style={{
-      top: "20px"
-    }}
     >
       <div
         className={`shadow-[0px_0px_15px_5px_#00000024] rounded-xl md:mx-1 lg:mx-5`}
@@ -189,12 +186,6 @@ const SegmentDrawer = ({
               </g>
               </svg>
             </button>
-
-            {/* {segmentTypes === "Click" && (
-              <p className={`my-3 text-sm text-blue-700 opacity-70`}>
-                Click em uma garra ou mais para seleciona-las com IA
-              </p>
-            )} */}
 
             <p className="text-sm font-bold mt-4 mb-1">
               Escolha a cor da garra:

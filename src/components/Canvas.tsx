@@ -83,6 +83,7 @@ const Canvas = ({
   const isDrawing = React.useRef(false);
 
   const convertLinesToSVGPath = (scaleX: number, scaleY: number) => {
+    if(lines.length === 0) return "";
     return lines.map((line, index) => {
       const points = line.points.map((point: number, i: number) => {
         const coordinate = Math.round(point * (i % 2 === 0 ? scaleX : scaleY));
@@ -112,14 +113,17 @@ const Canvas = ({
     const scalePath = scale!.uploadScale > 1 ? scale!.uploadScale : 0.685;
     const svgPath = convertLinesToSVGPath(scalePath, scalePath);
     console.log("SVG Path: ", svgPath);
-    setDrawnLines((prev) => [...prev, svgPath]);
+    if(svgPath.length > 0) {
+      setDrawnLines((prev) => [...prev, svgPath]);
+    }
     setLines([]);
   };
 
   const handleMouseDownLines = (e: any) => {
     if(!isAllowDrawing) return;
     isDrawing.current = true;
-    const pos = e.target.getStage().getPointerPosition();
+    if(!e?.target?.getStage()) return;
+    const pos = e?.target?.getStage()?.getPointerPosition();
     setLines([...lines, { points: [pos.x, pos.y] }]);
   };
 
@@ -128,8 +132,9 @@ const Canvas = ({
     // no drawing - skipping
     if (!isDrawing.current) return;
 
-    const stage = e.target.getStage();
-    const point = stage.getPointerPosition();
+    const stage = e?.target?.getStage();
+    if(!stage) return;
+    const point = stage?.getPointerPosition();
     let lastLine = lines[lines.length - 1];
     // add point
     lastLine.points = lastLine.points.concat([point.x, point.y]);
@@ -389,16 +394,18 @@ const Canvas = ({
               });
             }}
             onTouchEnd={(e) => {
-              if(isAllowDrawing) {
-                handleMouseUpLines();
-                return;
-              }
+              console.log("touch end. Num of touches: ", numOfTouches);
               if (stickerTabBool) return;
               if (
                 segmentTypes !== "All" &&
                 !hasTouchMoved &&
                 numOfTouches === 1
               ) {
+                if(isAllowDrawing) {
+                  handleMouseUpLines();
+                  setNumOfTouches(0);
+                  return;
+                }
                 setIsLoading(true);
                 superDefer(() => superDefer(() => handleMouseUp(e, true)));
               }
