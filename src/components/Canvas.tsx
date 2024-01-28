@@ -309,6 +309,7 @@ const Canvas = ({
         className={`absolute w-full h-full overflow-auto Canvas-wrapper md:overflow-visible md:w-auto md:h-auto absolute-center ${
           !isStandalone ? "pt-36 md:pt-0" : ""
         }`}
+        style={isAllowDrawing ? { overflow: "hidden" } : {}}
         ref={scrollRef}
       >
         <div
