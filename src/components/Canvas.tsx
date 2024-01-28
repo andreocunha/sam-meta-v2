@@ -377,7 +377,7 @@ const Canvas = ({
               handleMouseUp(e);
             }}
             onMouseMove={(e) => {
-              if(isAllowDrawing && numOfTouches === 1) {
+              if(isAllowDrawing) {
                 handleMouseMoveLines(e);
                 return;
               }
@@ -388,7 +388,9 @@ const Canvas = ({
             onTouchStart={(e) => {
               if (stickerTabBool) return;
               handleMouseDown(e);
-              handleMouseDownLines(e);
+              if(isAllowDrawing && numOfTouches === 0) {
+                handleMouseDownLines(e);
+              }
               setNumOfTouches((prev) => {
                 return prev + 1;
               });
