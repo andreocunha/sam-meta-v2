@@ -2,6 +2,7 @@ import { Tensor } from "onnxruntime-web";
 import React, { useState } from "react";
 import { modelInputProps } from "../helpers/Interface";
 import AppContext from "./createContext";
+import { colorsHold } from "./createContext";
 
 const AppContextProvider = (props: {
   children: React.ReactElement<any, string | React.JSXElementConstructor<any>>;
@@ -57,8 +58,10 @@ const AppContextProvider = (props: {
   const [holds, setHolds] = useState<{ svgStr: string; type: string }[]>([]);
   const [holdTypeSelected, setHoldTypeSelected] = useState<{ id: number; color: string }>({
     id: 0,
-    color: "#ff1717",
+    color: colorsHold.red,
   });
+  const [isAllowDrawing, setIsAllowDrawing] = useState<boolean>(false);
+  const [drawnLines, setDrawnLines] = React.useState<string[]>([]);
 
   return (
     <AppContext.Provider
@@ -99,6 +102,8 @@ const AppContextProvider = (props: {
         isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
         holds: [holds, setHolds],
         holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
+        isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
+        drawnLines: [drawnLines, setDrawnLines],
       }}
     >
       {props.children}

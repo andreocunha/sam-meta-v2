@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { RadialProgress } from "react-daisyui";
-import { Circle, Image, Layer, Path, Rect, Ring, Stage } from "react-konva";
+import { Circle, Image, Layer, Path, Rect, Ring, Stage, Line } from "react-konva";
 import {
   canvasScaleInitializer,
   canvasScaleResizer,
@@ -72,8 +72,79 @@ const Canvas = ({
     isModelLoaded: [isModelLoaded, setIsModelLoaded],
     isMultiMaskMode: [isMultiMaskMode, setIsMultiMaskMode],
     isHovering: [isHovering, setIsHovering],
+    holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
+    isAllowDrawing: [isAllowDrawing, setAllowDrawing],
+    drawnLines: [drawnLines, setDrawnLines],
   } = useContext(AppContext)!;
   if (!image) return null;
+
+  // custom drawing holds
+  const [lines, setLines] = React.useState<any[]>([]);
+  const isDrawing = React.useRef(false);
+
+  const convertLinesToSVGPath = (scaleX: number, scaleY: number) => {
+    return lines.map((line, index) => {
+      const points = line.points.map((point: number, i: number) => {
+        const coordinate = Math.round(point * (i % 2 === 0 ? scaleX : scaleY));
+        if(i === 0 && index === 0) {
+          return `M${coordinate}`;
+        }
+        if(i === 2) {
+          return `L${coordinate}`;
+        }
+        else {
+          return coordinate;
+        }
+      }).join(" ");
+      return points;
+    }).join(" ");
+  };
+
+  const handleExport = () => {
+    // console.log("scale!.height", scale!.height)
+    // console.log("scale!.width", scale!.width)
+    // const heightScale = scale!.height / scale!.width  
+    // console.log("heightScale", heightScale)
+    // const xScale = scale!.uploadScale;
+    // const yScale = heightScale * scale!.uploadScale;
+    // console.log("xScale", xScale)
+    // console.log("yScale", yScale)
+    const scalePath = scale!.uploadScale > 1 ? scale!.uploadScale : 0.685;
+    const svgPath = convertLinesToSVGPath(scalePath, scalePath);
+    console.log("SVG Path: ", svgPath);
+    setDrawnLines((prev) => [...prev, svgPath]);
+    setLines([]);
+  };
+
+  const handleMouseDownLines = (e: any) => {
+    if(!isAllowDrawing) return;
+    isDrawing.current = true;
+    const pos = e.target.getStage().getPointerPosition();
+    setLines([...lines, { points: [pos.x, pos.y] }]);
+  };
+
+  const handleMouseMoveLines = (e: any) => {
+    if(!isAllowDrawing) return;
+    // no drawing - skipping
+    if (!isDrawing.current) return;
+
+    const stage = e.target.getStage();
+    const point = stage.getPointerPosition();
+    let lastLine = lines[lines.length - 1];
+    // add point
+    lastLine.points = lastLine.points.concat([point.x, point.y]);
+
+    // replace last
+    lines.splice(lines.length - 1, 1, lastLine);
+    setLines(lines.concat());
+  };
+
+  const handleMouseUpLines = () => {
+    if(!isAllowDrawing) return;
+    isDrawing.current = false;
+    handleExport();
+  };
+
 
   console.log('scale', scale);
 
@@ -233,6 +304,7 @@ const Canvas = ({
           ></RadialProgress>
         </div>
       )}
+      {/* mouse event none pointer-events-none */}
       <div
         className={`absolute w-full h-full overflow-auto Canvas-wrapper md:overflow-visible md:w-auto md:h-auto absolute-center ${
           !isStandalone ? "pt-36 md:pt-0" : ""
@@ -240,21 +312,6 @@ const Canvas = ({
         ref={scrollRef}
       >
         <div
-          onMouseOver={() => {
-            if (segmentTypes === "Click" && isMultiMaskMode) {
-              setIsHovering(true);
-            }
-          }}
-          onMouseOut={() => {
-            if (
-              segmentTypes === "Click" &&
-              isMultiMaskMode &&
-              clicks !== null &&
-              clicks.length === 1
-            ) {
-              setIsHovering(false);
-            }
-          }}
           className={`Canvas relative ${
             isLoading ? "pointer-events-none" : ""
           } ${
@@ -271,22 +328,20 @@ const Canvas = ({
             src={image.src}
             className={`absolute w-full h-full pointer-events-none ${
               isLoading ||
-              (hasClicked && !isMultiMaskMode) ||
-              (isMultiMaskMode && clicks)
+              (svg && svg?.length > 0) || drawnLines.length > 0
                 ? "opacity-40"
                 : ""
             }`}
             style={{ margin: 0 }}
           ></img>
           {segmentTypes !== "All" &&
-            svg &&
+            // svg &&
             scale &&
-            hasClicked &&
+            (hasClicked || drawnLines.length > 0) &&
             !isMultiMaskMode && (
               <SvgMask
                 xScale={scale.width * scale.uploadScale}
                 yScale={scale.height * scale.uploadScale}
-                svgStr={svg.join(" ")}
               />
             )}
           <Stage
@@ -294,10 +349,18 @@ const Canvas = ({
             width={canvasDimensions.width}
             height={canvasDimensions.height}
             onMouseDown={(e) => {
+              if(isAllowDrawing) {
+                handleMouseDownLines(e);
+                return;
+              }
               if (stickerTabBool) return;
               handleMouseDown(e);
             }}
             onMouseUp={(e) => {
+              if(isAllowDrawing) {
+                handleMouseUpLines();
+                return;
+              }
               if (stickerTabBool) {
                 setStickerTabBool(false);
                 return;
@@ -307,17 +370,28 @@ const Canvas = ({
               setIsLoading(true);
               handleMouseUp(e);
             }}
-            onMouseMove={handleMouseMove}
+            onMouseMove={(e) => {
+              if(isAllowDrawing) {
+                handleMouseMoveLines(e);
+                return;
+              }
+              handleMouseMove(e);
+            }}
             onMouseOut={handleMouseOut}
             onMouseLeave={handleMouseOut}
             onTouchStart={(e) => {
               if (stickerTabBool) return;
               handleMouseDown(e);
+              handleMouseDownLines(e);
               setNumOfTouches((prev) => {
                 return prev + 1;
               });
             }}
             onTouchEnd={(e) => {
+              if(isAllowDrawing) {
+                handleMouseUpLines();
+                return;
+              }
               if (stickerTabBool) return;
               if (
                 segmentTypes !== "All" &&
@@ -330,7 +404,11 @@ const Canvas = ({
               setHasTouchMoved(false);
               setNumOfTouches(0);
             }}
-            onTouchMove={() => {
+            onTouchMove={(e) => {
+              if(isAllowDrawing) {
+                handleMouseMoveLines(e);
+                return;
+              }
               setHasTouchMoved(true);
             }}
             onContextMenu={(e: KonvaEventObject<PointerEvent>) =>
@@ -339,6 +417,20 @@ const Canvas = ({
             ref={konvaRef}
             style={scalingStyle}
           >
+            <Layer>
+              {lines?.map((line, i) => (
+                <Line
+                  key={i}
+                  points={line.points}
+                  stroke={holdTypeSelected.color || "#df4b26"}
+                  strokeWidth={3}
+                  tension={0.5}
+                  lineCap="round"
+                  lineJoin="round"
+                  globalCompositeOperation={'source-over'}
+                />
+              ))}
+            </Layer>
             <Layer name="annotations">
               {click && clickColor && (
                 <>

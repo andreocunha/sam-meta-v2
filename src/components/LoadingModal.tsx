@@ -34,7 +34,7 @@ const LoadingModal = ({ handleResetState }: LoadingModalProps) => {
               {isErasing &&
                 eraserText.isErase &&
                 "Masks can be fed into other open source models"}
-              {!isErasing && "Extracting an embedding for the image..."}
+              {!isErasing && "Analisando a imagem com nossa IA"}
             </p>
             <div className="loading-bar"></div>
             <button

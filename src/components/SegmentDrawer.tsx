@@ -2,10 +2,10 @@ import React, { useContext, useState } from "react";
 import { getCookieConsentValue } from "react-cookie-consent";
 import { useDropzone } from "react-dropzone";
 import * as ReactGA from "react-ga4";
-import Animate from "./hooks/Animation";
 import AppContext from "./hooks/createContext";
 import SegmentOptions from "./SegmentOptions";
-import Sparkle from "./Sparkle";
+import { colorsHold } from "./hooks/createContext";
+
 
 interface SegmentDrawerProps {
   handleResetState: () => void;
@@ -29,7 +29,6 @@ interface SegmentDrawerProps {
 }
 
 const SegmentDrawer = ({
-  handleResetState,
   handleResetInteraction,
   handleUndoInteraction,
   handleRedoInteraction,
@@ -37,7 +36,6 @@ const SegmentDrawer = ({
   handleMagicErase,
   handleImage,
   handleMultiMaskMode,
-  userNegClickBool: [userNegClickBool, setUserNegClickBool],
   showGallery: [showGallery, setShowGallery],
   hasClicked,
   handleSelectedImage,
@@ -48,6 +46,8 @@ const SegmentDrawer = ({
     didShowAMGAnimation: [didShowAMGAnimation, setDidShowAMGAnimation],
     isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
     holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
+    isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
+    drawnLines: [drawnLines, setDrawnLines],
   } = useContext(AppContext)!;
 
   const [uploadClick, setUploadClick] = useState<boolean>(true);
@@ -70,10 +70,8 @@ const SegmentDrawer = ({
     allTimeout: string | number | NodeJS.Timeout | undefined,
     cutOutTimeout: string | number | NodeJS.Timeout | undefined;
 
-  // setIsClickMounted(false)
-  // setIsBoxMounted(false)
-  // setIsAllMounted(false)
-  // setIsCutOutMounted(false)
+  const [minimize, setMinimize] = useState<boolean>(false);
+  const [selectedOption, setSelectedOption] = useState<string>("IA");
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -102,46 +100,43 @@ const SegmentDrawer = ({
     maxSize: 50_000_000,
   });
 
+  // return small circle on top left of screen
+  if(minimize) {
+    return (
+      <div 
+        onClick={() => setMinimize(false)}
+        style={{
+          position: "absolute",
+          top: "5px",
+          left: "5px",
+          zIndex: 30,
+          backgroundColor: "#ffffff",
+          borderRadius: "50%",
+          width: "35px",
+          height: "35px",
+          display: "flex",
+          border: "1px solid #878686",
+          padding: "7px",
+          justifyContent: "center",
+          alignItems: "center",
+          cursor: "pointer",
+        }}
+      >
+        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 122.6 122.88"><g><path d="M110.6,72.58c0-3.19,2.59-5.78,5.78-5.78c3.19,0,5.78,2.59,5.78,5.78v33.19c0,4.71-1.92,8.99-5.02,12.09 c-3.1,3.1-7.38,5.02-12.09,5.02H17.11c-4.71,0-8.99-1.92-12.09-5.02c-3.1-3.1-5.02-7.38-5.02-12.09V17.19 C0,12.48,1.92,8.2,5.02,5.1C8.12,2,12.4,0.08,17.11,0.08h32.98c3.19,0,5.78,2.59,5.78,5.78c0,3.19-2.59,5.78-5.78,5.78H17.11 c-1.52,0-2.9,0.63-3.91,1.63c-1.01,1.01-1.63,2.39-1.63,3.91v88.58c0,1.52,0.63,2.9,1.63,3.91c1.01,1.01,2.39,1.63,3.91,1.63h87.95 c1.52,0,2.9-0.63,3.91-1.63s1.63-2.39,1.63-3.91V72.58L110.6,72.58z M112.42,17.46L54.01,76.6c-2.23,2.27-5.89,2.3-8.16,0.07 c-2.27-2.23-2.3-5.89-0.07-8.16l56.16-56.87H78.56c-3.19,0-5.78-2.59-5.78-5.78c0-3.19,2.59-5.78,5.78-5.78h26.5 c5.12,0,11.72-0.87,15.65,3.1c2.48,2.51,1.93,22.52,1.61,34.11c-0.08,3-0.15,5.29-0.15,6.93c0,3.19-2.59,5.78-5.78,5.78 c-3.19,0-5.78-2.59-5.78-5.78c0-0.31,0.08-3.32,0.19-7.24C110.96,30.94,111.93,22.94,112.42,17.46L112.42,17.46z"/></g></svg>
+      </div>
+    );
+  }
+
   return (
-    <section className="flex-col hidden w-1/5 pt-[6%] overflow-y-auto md:flex lg:w-72">
+    <section className="absolute top-0 left-0 z-30 flex-col flex w-full lg:w-72 overflow-y-auto bg-white"
+    style={{
+      top: "20px"
+    }}
+    >
       <div
         className={`shadow-[0px_0px_15px_5px_#00000024] rounded-xl md:mx-1 lg:mx-5`}
       >
         <div className="p-4 pt-5">
-          <div className="flex justify-between p-2 pb-3">
-            <span className="leading-3">Tools</span>
-          </div>
-          {uploadClick && (
-            <div className="flex justify-between px-3 py-2 mb-3 cursor-pointer rounded-xl outline outline-gray-200">
-              <button
-                className="flex"
-                onClick={() => {
-                  setShowGallery(true);
-                  setIsCutOut(false);
-                  setIsToolBarUpload(true);
-                }}
-              >
-                <span {...getRootProps()} className="flex text-sm">
-                  <input {...getInputProps()} />
-                  <img src="assets/upload_arrow.svg" className="w-5 mr-1" />
-                  Upload
-                </span>
-              </button>
-              <button
-                className="flex"
-                onClick={() => {
-                  setIsToolBarUpload(false);
-                  setShowGallery(false);
-                  setIsCutOut(false);
-                  setDidShowAMGAnimation(false);
-                  handleResetState();
-                }}
-              >
-                <img src="assets/icn-image-gallery.svg" className="w-5 mr-1" />
-                <span className="text-sm">Gallery</span>
-              </button>
-            </div>
-          )}
           <div
             onClick={() => {
               segmentTypes !== "Click" && handleResetInteraction();
@@ -155,7 +150,7 @@ const SegmentDrawer = ({
               setIsCutOut(false);
               setDidShowAMGAnimation(false);
             }}
-            className={`transition-all overflow-hidden pb-2 ${
+            className={`relative transition-all overflow-hidden pb-2 ${
               segmentTypes !== "Click" &&
               (isClickCollapsed ? "max-h-[40px]" : "max-h-[85px]")
             } px-3 py-2 cursor-pointer rounded-xl ${
@@ -184,86 +179,110 @@ const SegmentDrawer = ({
               setIsCutOutMounted(false);
             }}
           >
-            <div className="flex">
-              <svg
-                width="17"
-                height="24"
-                viewBox="0 0 17 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-3 mr-2"
-              >
-                <path
-                  d="M9.13635 23.8813C8.53843 24.1683 7.82091 23.9172 7.54586 23.3192L4.93889 17.6509L1.93729 20.0665C1.73399 20.2339 1.48286 20.3296 1.19586 20.3296C0.878697 20.3296 0.574526 20.2036 0.350259 19.9793C0.125992 19.7551 0 19.4509 0 19.1337V1.19586C0 0.878697 0.125992 0.574526 0.350259 0.350259C0.574526 0.125992 0.878697 0 1.19586 0C1.48286 0 1.75791 0.107627 1.96121 0.275047L1.97317 0.263089L15.7136 11.7912C16.2278 12.2217 16.2876 12.9751 15.869 13.4773C15.6897 13.6926 15.4385 13.8361 15.1874 13.8839L11.4085 14.6253L14.0394 20.2817C14.3503 20.8797 14.0633 21.5852 13.4654 21.8603L9.13635 23.8813Z"
-                  fill={`${segmentTypes === "Click" ? "#2962D9" : "#000000"}`}
-                />
+            {/* button to minimize */}
+            <button className="absolute top-0 right-0 z-50 p-2 cursor-pointer" onClick={() => setMinimize(true)}>
+              <svg fill="#000000" height="15px" width="15px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 330">
+              <g>
+                <path d="M315,0H15C6.716,0,0,6.716,0,15v300c0,8.284,6.716,15,15,15h300c8.284,0,15-6.716,15-15V15C330,6.716,323.284,0,315,0z
+                  M300,300H30V30h270V300z"/>
+                <path d="M95,180h140c8.284,0,15-6.716,15-15s-6.716-15-15-15H95c-8.284,0-15,6.716-15,15S86.716,180,95,180z"/>
+              </g>
               </svg>
-              <span
-                className={`font-bold ${
-                  segmentTypes === "Click" && "text-blue-600"
-                }`}
-              >
-                Click
-              </span>
-            </div>
-            {segmentTypes === "Click" && (
-              <p className={`my-3 text-[11px] text-blue-700 opacity-70`}>
-                Click em uma garra ou mais para seleciona-las.
-              </p>
-            )}
+            </button>
 
+            {/* {segmentTypes === "Click" && (
+              <p className={`my-3 text-sm text-blue-700 opacity-70`}>
+                Click em uma garra ou mais para seleciona-las com IA
+              </p>
+            )} */}
+
+            <p className="text-sm font-bold mt-4 mb-1">
+              Escolha a cor da garra:
+            </p>
             <div className="flex flex-row w-full justify-between">
                 {/* 3 buttons to holdTypeSelected, red, blue and yellow */}
                 <button
                     style={{
-                        backgroundColor: "#ff1717",
+                        backgroundColor: colorsHold.red,
                         borderRadius: "50%",
                         width: "30px",
                         height: "30px",
-                        border: holdTypeSelected.color === "#ff1717" ? "3px solid #878686" : "none",
+                        border: holdTypeSelected.color === colorsHold.red ? "3px solid #878686" : "none",
                         outline: "none",
                         cursor: "pointer",
-                        transform: holdTypeSelected.color === "#ff1717" ? "scale(1.2)" : "none"
+                        transform: holdTypeSelected.color === colorsHold.red ? "scale(1.2)" : "none"
                     }}
                     onClick={() => {
-                        setHoldTypeSelected({ id: 0, color: "#ff1717" });
+                        setHoldTypeSelected({ id: 0, color: colorsHold.red });
                     }}
                 ></button>
                 <button
                     style={{
-                        backgroundColor: "#1717ff",
+                        backgroundColor: colorsHold.blue,
                         borderRadius: "50%",
                         width: "30px",
                         height: "30px",
-                        border: holdTypeSelected.color === "#1717ff" ? "3px solid #878686" : "none",
+                        border: holdTypeSelected.color === colorsHold.blue ? "3px solid #878686" : "none",
                         outline: "none",
                         cursor: "pointer",
-                        transform: holdTypeSelected.color === "#1717ff" ? "scale(1.2)" : "none"
+                        transform: holdTypeSelected.color === colorsHold.blue ? "scale(1.2)" : "none"
                     }}
                     onClick={() => {
-                        setHoldTypeSelected({ id: 1, color: "#1717ff" });
+                        setHoldTypeSelected({ id: 1, color: colorsHold.blue });
                     }}
                 ></button>
                 <button
                     style={{
-                        backgroundColor: "#ffff17",
+                        backgroundColor: colorsHold.yellow,
                         borderRadius: "50%",
                         width: "30px",
                         height: "30px",
-                        border: holdTypeSelected.color === "#ffff17" ? "3px solid #878686" : "none",
+                        border: holdTypeSelected.color === colorsHold.yellow ? "3px solid #878686" : "none",
                         outline: "none",
                         cursor: "pointer",
-                        transform: holdTypeSelected.color === "#ffff17" ? "scale(1.2)" : "none"
+                        transform: holdTypeSelected.color === colorsHold.yellow ? "scale(1.2)" : "none"
                     }}
                     onClick={() => {
-                        setHoldTypeSelected({ id: 2, color: "#ffff17" });
+                        setHoldTypeSelected({ id: 2, color: colorsHold.yellow });
                     }}
                 ></button>
             </div>
+            
+            <p className="text-sm font-bold mt-4 mb-1">
+              Escolha uma opcão:
+            </p>
+            <select
+              className="w-full mb-2 p-3 pl-2 py-2 text-sm font-bold bg-white text-black border rounded-md"
+              onChange={(e) => {
+                setSelectedOption(e.target.value);
+                if (e.target.value == "AI") {
+                  setIsAllowDrawing(false);
+                } else {
+                  setIsAllowDrawing(true)
+                }
+              }}
+              value={selectedOption}
+            >
+              <option value="AI">Selecionar com IA</option>
+              <option value="Desenhar">Desenho livre</option>
+            </select>
 
-
-                        
-            {segmentTypes === "Click" && (
+            {isAllowDrawing ? 
+              <button 
+                className={`w-full p-3 py-2 my-2 text-sm font-bold bg-gray-200 rounded-xl ${
+                  drawnLines.length === 0 && "disabled"
+                }`}
+                onClick={() => {
+                  setDrawnLines((prev) => 
+                    prev.length > 0 ? prev.slice(0, -1) : prev
+                  );
+                }}
+                disabled={drawnLines.length === 0}
+              >
+                Apagar ultimo desenho
+              </button>
+              :
+            (
               <SegmentOptions
                 handleResetInteraction={handleResetInteraction}
                 handleUndoInteraction={handleUndoInteraction}

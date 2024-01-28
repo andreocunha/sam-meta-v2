@@ -495,6 +495,8 @@ const Stage = ({
       setNewAnnotation([]);
     }
     if (predMasks?.length && clicks?.length) {
+      console.log("UNDO")
+      console.log(predMasks)
       const newPredMasks = [...predMasks];
       const oldPredMask = newPredMasks.pop();
       const newPredMasksHistory = [...(predMasksHistory || [])];
@@ -643,7 +645,7 @@ const Stage = ({
                 handleSelectedImage={handleSelectedImage}
               />
               <div className="relative flex flex-col items-center justify-center flex-1 overflow-hidden md:overflow-visible md:px-12 md:py-9">
-                <div className="absolute top-0 z-30 flex flex-col items-center justify-center w-full md:relative">
+                {/* <div className="absolute top-0 z-30 flex flex-col items-center justify-center w-full md:relative">
                   <MobileOptionNavBar
                     handleResetInteraction={handleResetInteraction}
                     handleUndoInteraction={handleUndoInteraction}
@@ -652,7 +654,7 @@ const Stage = ({
                     handleImage={handleImage}
                     userNegClickBool={[userNegClickBool, setUserNegClickBool]}
                   />
-                </div>
+                </div> */}
                 <div
                   className="relative flex-1 w-full mb-3 md:my-7"
                   ref={containerRef}

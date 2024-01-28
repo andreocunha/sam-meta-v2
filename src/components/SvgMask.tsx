@@ -1,17 +1,16 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
 import AppContext from "./hooks/createContext";
+import { colorsHold } from "./hooks/createContext";
 
 interface SvgMaskProps {
   xScale: number;
   yScale: number;
-  svgStr: string;
   className?: string | undefined;
 }
 
 const SvgMask = ({
   xScale,
   yScale,
-  svgStr,
   className = "",
 }: SvgMaskProps) => {
   const {
@@ -22,6 +21,7 @@ const SvgMask = ({
     svg: [svg],
     isMultiMaskMode: [isMultiMaskMode, setIsMultiMaskMode],
     holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
+    drawnLines: [drawnLines, setDrawnLines],
   } = useContext(AppContext)!;
   const [key, setKey] = useState(Math.random());
   const [boundingBox, setBoundingBox] = useState<DOMRect | undefined>(
@@ -36,6 +36,14 @@ const SvgMask = ({
     svg: string;
     color: string;
   }[] | null>(null);
+  const [allSvgAI, setAllSvgAI] = useState<{
+    svg: string;
+    color: string;
+  }[] | null>(null);
+  const [allSvgDraw, setAllSvgDraw] = useState<{
+    svg: string;
+    color: string;
+  }[] | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -46,13 +54,14 @@ const SvgMask = ({
   }, [svg]);
 
   useEffect(() => {
-    if (svgStr) {
-      console.log("svgStr", svgStr);
-      const splitSvgStr = svgStr.split(/(?=M)/g);
+    if (svg && svg.length > 0) {
+      // join and remove empty strings
+      const svgAIStr = svg.join(" ");
+      const splitSvgStr = (svgAIStr).split(/(?=M)/g);
       const filteredSvgStr = splitSvgStr.filter((str) => str);
-      const lastSvg = filteredSvgStr[filteredSvgStr.length - 1]; // pegando o último SVG
+      const lastSvg = filteredSvgStr[filteredSvgStr.length - 1].trim(); // pegando o último SVG
   
-      setAllSvg((currentAllSvg) => {
+      setAllSvgAI((currentAllSvg) => {
         // Se não existir nenhum SVG, inicializa o allSvg
         if (!currentAllSvg || currentAllSvg.length === 0) {
           return lastSvg ? [{ svg: lastSvg, color: holdTypeSelected.color }] : [];
@@ -75,15 +84,51 @@ const SvgMask = ({
         return currentAllSvg;
       });
     }
-  }, [svgStr]); // Removendo holdTypeSelected.color da lista de dependências
+    else {
+      setAllSvgAI(null);
+    }
+  }, [svg]);
+
+
+  useEffect(() => {
+    if (drawnLines && drawnLines.length > 0) {
+      const svgLinesStr = drawnLines.join(" ");
+      const splitSvgStr = (svgLinesStr).split(/(?=M)/g);
+      const filteredSvgStr = splitSvgStr.filter((str) => str);
+      const lastSvg = filteredSvgStr[filteredSvgStr.length - 1].trim();; // pegando o último SVG
   
+      setAllSvgDraw((currentAllSvg) => {
+        // Se não existir nenhum SVG, inicializa o allSvg
+        if (!currentAllSvg || currentAllSvg.length === 0) {
+          return lastSvg ? [{ svg: lastSvg, color: holdTypeSelected.color }] : [];
+        }
   
+        // Verificando se o último SVG já existe em allSvg
+        const existingIndex = currentAllSvg.findIndex(item => item.svg === lastSvg);
   
+        if (existingIndex === -1) {
+          // Se o último SVG é novo, adicione-o com a cor atual
+          return [...currentAllSvg, { svg: lastSvg, color: holdTypeSelected.color }];
+        } else if (filteredSvgStr.length < currentAllSvg.length) {
+          // Se há menos SVGs em filteredSvgStr do que em allSvg, um SVG foi removido
+          // Remova o último SVG de allSvg
+          const newAllSvg = currentAllSvg.slice(0, -1);
+          return newAllSvg;
+        }
   
+        // Se não houver mudanças no número de SVGs, retorne o allSvg atual
+        return currentAllSvg;
+      });
+    }
+    else {
+      setAllSvgDraw(null);
+    }
+  }, [drawnLines]);  
 
   useEffect(() => {
     console.log("allSvg", allSvg);
-  }, [allSvg]);
+    setAllSvg([...(allSvgAI || []), ...(allSvgDraw || [])]);
+  }, [allSvgAI, allSvgDraw]);
 
   useEffect(() => { 
     console.log("holdTypeSelected", holdTypeSelected);
@@ -95,7 +140,7 @@ const SvgMask = ({
   const bbHeight = boundingBox?.height;
   const bbMiddleY = bbY && bbHeight && bbY + bbHeight / 2;
   const bbWidthRatio = bbWidth && bbWidth / xScale;
-  const colors = ['#ff1717', '#1717ff' ,'#ffff17'];
+  // const colors = ['#ff1717', '#1717ff' ,'#ffff17'];
 
 
   return (
@@ -135,21 +180,36 @@ const SvgMask = ({
         </>
       )}
       <clipPath id={"clip-path"}>
-        <path d={svgStr} />
+        <path d={allSvg?.map((path) => path.svg).join(" ") || ""} />
       </clipPath>
-      {colors?.map((color, index) => (
+      {/* {colors?.map((color, index) => (
         <filter id={`glow-${color}`} x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={color} />
           <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={color} />
         </filter>
-      ))}
+      ))} */}
+      <filter id={`glow-${colorsHold.red}`} x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={colorsHold.red} />
+        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colorsHold.red} />
+      </filter>
+      <filter id={`glow-${colorsHold.blue}`} x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={colorsHold.blue} />
+        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colorsHold.blue} />
+      </filter>
+      <filter id={`glow-${colorsHold.yellow}`} x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={colorsHold.yellow} />
+        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colorsHold.yellow} />
+      </filter>
+
+
+
       <image
         width="100%"
         height="100%"
         xlinkHref={image?.src}
         clipPath={`url(#clip-path)`}
       />
-      {!click && (!isLoading || isErasing) && (
+      {(!isLoading || isErasing) && (
         <>
           {!isMultiMaskMode && bbWidthRatio && (
             <path
@@ -157,7 +217,7 @@ const SvgMask = ({
               className={`mask-gradient ${
                 bbWidthRatio > 0.5 && window.innerWidth < 768 ? "hidden" : ""
               }`}
-              d={svgStr}
+              d={allSvg?.map((path) => path.svg).join(" ") || ""}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeOpacity="0"
@@ -168,6 +228,7 @@ const SvgMask = ({
           {/* split svgStr into multiple paths */}
           {(allSvg && allSvg.length > 0) && allSvg.map((path, index) => (
             <path
+              key={index}
               id={`mask-path-${index}`}
               className="mask-path"
               d={path.svg}

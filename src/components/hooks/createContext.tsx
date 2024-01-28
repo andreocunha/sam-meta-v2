@@ -142,9 +142,24 @@ interface contextProps {
       React.SetStateAction<{ id: number; color: string }>
     >
   ];
-  
+  // const [allowDrawing, setAllowDrawing] = React.useState<boolean>(false);
+  isAllowDrawing: [
+    isAllowDrawing: boolean,
+    setIsAllowDrawing: React.Dispatch<React.SetStateAction<boolean>>
+  ];
+  // const [drawnLines, setDrawnLines] = React.useState<string[]>([]);
+  drawnLines: [
+    drawnLines: string[],
+    setDrawnLines: React.Dispatch<React.SetStateAction<string[]>>
+  ];
 }
 
 const AppContext = createContext<contextProps | null>(null);
 
 export default AppContext;
+
+export const colorsHold = {
+  red: '#f33636', 
+  blue: '#44bbdb',
+  yellow: '#dbd644',
+}
