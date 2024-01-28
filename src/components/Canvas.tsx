@@ -314,7 +314,7 @@ const Canvas = ({
         className={`absolute w-full h-full overflow-auto Canvas-wrapper md:overflow-visible md:w-auto md:h-auto absolute-center ${
           !isStandalone ? "pt-36 md:pt-0" : ""
         }`}
-        style={isAllowDrawing ? { overflow: "hidden" } : {}}
+        style={(isAllowDrawing && numOfTouches === 1) ? { overflow: "hidden" } : {}}
         ref={scrollRef}
       >
         <div
@@ -377,7 +377,7 @@ const Canvas = ({
               handleMouseUp(e);
             }}
             onMouseMove={(e) => {
-              if(isAllowDrawing) {
+              if(isAllowDrawing && numOfTouches === 1) {
                 handleMouseMoveLines(e);
                 return;
               }
