@@ -270,6 +270,19 @@ const Canvas = ({
     }
   }, [clicks, isHovering]);
 
+  useEffect(() => {
+    document.addEventListener('touchmove', function(e) {
+      if (e.touches.length > 1) {
+        e.preventDefault(); // Bloqueia o zoom
+      } else {
+        // Verifica se a página está no topo e o usuário está arrastando para baixo
+        if (window.pageYOffset === 0 && e.touches[0].clientY > 0) {
+          e.preventDefault(); // Bloqueia o pull-to-refresh
+        }
+      }
+    }, { passive: false });
+  }, []);
+
   const shouldShowSpinner =
     (segmentTypes === "All" && isLoading) ||
     (isLoading && !hasClicked && !isModelLoaded.boxModel) ||
