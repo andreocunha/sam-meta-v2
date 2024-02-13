@@ -62,7 +62,7 @@ const AppContextProvider = (props: {
   });
   const [isAllowDrawing, setIsAllowDrawing] = useState<boolean>(false);
   const [drawnLines, setDrawnLines] = React.useState<string[]>([]);
-  const [drawnLinesHistory, setDrawnLinesHistory] = React.useState<string[]>([]);
+  const [drawnLinesHistory, setDrawnLinesHistory] = React.useState<string[] | null>(null);
 
   return (
     <AppContext.Provider

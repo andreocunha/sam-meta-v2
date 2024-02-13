@@ -93,155 +93,108 @@ const SegmentDrawer = ({
     };
   }, []);
 
+
   return (
     <section
-      className="absolute bottom-0 z-30 flex flex-col w-full bg-white rounded-xl"
-      style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', maxWidth: '400px' }}
+      className="absolute bottom-0 z-30 flex flex-row w-fit bg-white rounded-xl items-center justify-between"
+      style={{ backgroundColor: 'rgba(184, 184, 184, 0.7)', maxWidth: '400px', height: 50, bottom: 0 }}
       ref={drawRef}
     >
-      <div className="flex justify-center items-center p-4 h-10 w-full"
-        onClick={toggleExpand}
-      >
-        <div
-          className="w-10 h-1 bg-gray-400 rounded-full"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+
+      <div className="flex flex-row w-fit items-center justify-center px-2 gap-2">
+        <button
+          onClick={() => {
+            setIsAllowDrawing(false);
+          }}
+          className="w-10 h-10 bg-white rounded-md"
+          style={!isAllowDrawing ? { border: "3px solid #33ff00" } : {border: "3px solid #7c7c7c"}}
         >
-        </div>
+          <img src="/assets/hand.svg" alt="Hand" className="w-full h-auto" />
+        </button>
+        <button
+          onClick={() => {
+            setIsAllowDrawing(true);
+          }}
+          className="w-10 h-10 bg-white rounded-md"
+          style={isAllowDrawing ? { border: "3px solid #33ff00" } : {border: "3px solid #7c7c7c"}}
+        >
+          <img src="/assets/draw.svg" alt="Draw" className="w-10 h-10" />
+        </button>
       </div>
-        <div className="px-4" style={contentStyle}>
-          <div
-            onClick={() => {
-              segmentTypes !== "Click" && handleResetInteraction();
-              getCookieConsentValue("sa_demo") === "true" &&
-                ReactGA.default.send({
-                  category: "event",
-                  action: "is_click",
-                });
-              clearTimeout(clickTimeout);
-              setSegmentTypes("Click");
-              setIsCutOut(false);
-              setDidShowAMGAnimation(false);
-            }}
-            onMouseEnter={() => {
-              clearTimeout(clickTimeout);
-              clickTimeout = setTimeout(() => {
-                setIsClickCollapsed(false);
-                setVisibleClickHover(true);
-                setIsClickMounted(!isClickMounted);
-              }, 700);
-            }}
-            onMouseLeave={() => {
-              setIsClickCollapsed(true);
-              setIsBoxCollapsed(true);
-              setIsAllCollapsed(true);
-              setIsCutOutCollapsed(true);
-              // setVisibleClickHover(false);
-              clearTimeout(clickTimeout);
-              setIsClickMounted(false);
-              setIsBoxMounted(false);
-              setIsAllMounted(false);
-              setIsCutOutMounted(false);
-            }}
-          >
-            <p className="text-sm font-bold mb-1">
-              Escolha a cor da garra:
-            </p>
-            <div className="flex flex-row w-full justify-between">
-              {/* 3 buttons to holdTypeSelected, red, blue and yellow */}
-              <button
-                style={{
-                  backgroundColor: colorsHold.red,
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  border: holdTypeSelected.color === colorsHold.red ? "3px solid #878686" : "none",
-                  outline: "none",
-                  cursor: "pointer",
-                  transform: holdTypeSelected.color === colorsHold.red ? "scale(1.2)" : "none"
-                }}
-                onClick={() => {
-                  setHoldTypeSelected({ id: 0, color: colorsHold.red });
-                }}
-              ></button>
-              <button
-                style={{
-                  backgroundColor: colorsHold.blue,
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  border: holdTypeSelected.color === colorsHold.blue ? "3px solid #878686" : "none",
-                  outline: "none",
-                  cursor: "pointer",
-                  transform: holdTypeSelected.color === colorsHold.blue ? "scale(1.2)" : "none"
-                }}
-                onClick={() => {
-                  setHoldTypeSelected({ id: 1, color: colorsHold.blue });
-                }}
-              ></button>
-              <button
-                style={{
-                  backgroundColor: colorsHold.yellow,
-                  borderRadius: "50%",
-                  width: "30px",
-                  height: "30px",
-                  border: holdTypeSelected.color === colorsHold.yellow ? "3px solid #878686" : "none",
-                  outline: "none",
-                  cursor: "pointer",
-                  transform: holdTypeSelected.color === colorsHold.yellow ? "scale(1.2)" : "none"
-                }}
-                onClick={() => {
-                  setHoldTypeSelected({ id: 2, color: colorsHold.yellow });
-                }}
-              ></button>
-            </div>
 
-            <p className="text-sm font-bold mt-4 mb-1">
-              Escolha uma opcão:
-            </p>
-            <select
-              className="w-full mb-2 p-3 pl-2 py-2 text-sm font-bold bg-white text-black border rounded-md"
-              onChange={(e) => {
-                setSelectedOption(e.target.value);
-                if (e.target.value == "AI") {
-                  setIsAllowDrawing(false);
-                } else {
-                  setIsAllowDrawing(true)
-                }
-              }}
-              value={selectedOption}
-            >
-              <option value="AI">Selecionar com IA</option>
-              <option value="Desenhar">Desenho livre</option>
-            </select>
+      {/* vertical line */}
+      <div style={{ width: "2px", height: "70%", backgroundColor: "#e7e7e7", marginLeft: 10, marginRight: 10 }}></div>
 
-            {isAllowDrawing ?
-              <button
-                className={`w-full p-3 py-2 my-2 text-sm font-bold bg-gray-200 rounded-xl ${drawnLines.length === 0 && "disabled"
-                  }`}
-                onClick={() => {
-                  setDrawnLines((prev) =>
-                    prev.length > 0 ? prev.slice(0, -1) : prev
-                  );
-                }}
-                disabled={drawnLines.length === 0}
-              >
-                Apagar ultimo desenho
-              </button>
-              :
-              (
-                <SegmentOptions
-                  handleResetInteraction={handleResetInteraction}
-                  handleUndoInteraction={handleUndoInteraction}
-                  handleRedoInteraction={handleRedoInteraction}
-                  handleMagicErase={handleMagicErase}
-                  handleImage={handleImage}
-                  hasClicked={hasClicked}
-                  isCutOut={[isCutOut, setIsCutOut]}
-                  handleMultiMaskMode={handleMultiMaskMode}
-                />
-              )}
-          </div>
-        </div>
+      <div className="flex flex-row w-fit items-center justify-center px-2 gap-2">
+        {/* 3 buttons to holdTypeSelected, red, blue and yellow */}
+        <button
+          style={{
+            backgroundColor: colorsHold.red,
+            borderRadius: "50%",
+            width: "30px",
+            height: "30px",
+            border: holdTypeSelected.color === colorsHold.red ? "3px solid #33ff00" : "none",
+            outline: "none",
+            cursor: "pointer",
+            transform: holdTypeSelected.color === colorsHold.red ? "scale(1.2)" : "none"
+          }}
+          onClick={() => {
+            setHoldTypeSelected({ id: 0, color: colorsHold.red });
+          }}
+        ></button>
+        <button
+          style={{
+            backgroundColor: colorsHold.blue,
+            borderRadius: "50%",
+            width: "30px",
+            height: "30px",
+            border: holdTypeSelected.color === colorsHold.blue ? "3px solid #33ff00" : "none",
+            outline: "none",
+            cursor: "pointer",
+            transform: holdTypeSelected.color === colorsHold.blue ? "scale(1.2)" : "none"
+          }}
+          onClick={() => {
+            setHoldTypeSelected({ id: 1, color: colorsHold.blue });
+          }}
+        ></button>
+        <button
+          style={{
+            backgroundColor: colorsHold.yellow,
+            borderRadius: "50%",
+            width: "30px",
+            height: "30px",
+            border: holdTypeSelected.color === colorsHold.yellow ? "3px solid #33ff00" : "none",
+            outline: "none",
+            cursor: "pointer",
+            transform: holdTypeSelected.color === colorsHold.yellow ? "scale(1.2)" : "none"
+          }}
+          onClick={() => {
+            setHoldTypeSelected({ id: 2, color: colorsHold.yellow });
+          }}
+        ></button>
+      </div>
+
+      <div className="flex flex-col fixed"
+        style={{ top: "10px", right: "10px", width: 140 }}
+      >
+        {isAllowDrawing ?
+          <SegmentOptions
+            type="Draw"
+            handleResetInteraction={handleResetInteraction}
+            handleUndoInteraction={handleUndoInteraction}
+            handleRedoInteraction={handleRedoInteraction}
+          />
+          :
+          (
+            <SegmentOptions
+              type="AI"
+              handleResetInteraction={handleResetInteraction}
+              handleUndoInteraction={handleUndoInteraction}
+              handleRedoInteraction={handleRedoInteraction}
+            />
+          )}
+      </div>
+
     </section>
   );
 };

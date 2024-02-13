@@ -5,65 +5,50 @@ interface SegmentOptionsProps {
   handleResetInteraction: () => void;
   handleUndoInteraction: () => void;
   handleRedoInteraction: () => void;
-  handleMagicErase: () => void;
-  handleImage: (img?: HTMLImageElement) => void;
-  hasClicked: boolean;
-  isCutOut: [isCutOut: boolean, setIsCutOut: (e: boolean) => void];
-  handleMultiMaskMode: () => void;
+  // type AI or Draw
+  type?: 'AI' | 'Draw';
 }
 
 const SegmentOptions = ({
   handleResetInteraction,
   handleUndoInteraction,
   handleRedoInteraction,
-  handleMagicErase,
-  handleImage,
-  hasClicked,
-  isCutOut: [isCutOut, setIsCutOut],
-  handleMultiMaskMode,
+  type,
 }: SegmentOptionsProps) => {
   const {
-    isModelLoaded: [isModelLoaded, setIsModelLoaded],
-    segmentTypes: [segmentTypes, setSegmentTypes],
-    isLoading: [isLoading, setIsLoading],
-    isErased: [isErased, setIsErased],
     svg: [svg, setSVG],
     clicksHistory: [clicksHistory, setClicksHistory],
-    image: [image],
-    isMultiMaskMode: [isMultiMaskMode, setIsMultiMaskMode],
     svgs: [svgs, setSVGs],
-    clicks: [clicks, setClicks],
-    showLoadingModal: [showLoadingModal, setShowLoadingModal],
-    didShowAMGAnimation: [didShowAMGAnimation, setDidShowAMGAnimation],
+    drawnLines: [drawnLines, setDrawnLines],
+    drawnLinesHistory: [drawnLinesHistory, setDrawnLinesHistory],
   } = useContext(AppContext)!;
   return (
     <>
       <div
-        className={`flex justify-between px-4 py-2 my-2 text-sm bg-gray-200 rounded-xl opacity-70 ${
-          segmentTypes === "All" && "hidden"
-        } ${isCutOut && "hidden"}`}
+        className={`flex justify-between px-4 py-2 my-2 gap-2 text-sm bg-gray-300 rounded-xl`}
+        style={{
+          color: "black",
+          opacity: 0.8,
+        }}
       >
         <button
           onClick={() => {
-            if (isErased) {
-              setIsErased(false);
-              setIsLoading(true);
-              handleImage();
-            }
-            setSegmentTypes("Click");
             handleResetInteraction();
           }}
           className={`${
-            ((!svg && !svgs && !isErased) || segmentTypes === "All") &&
+            (type === "AI" && !svg) || (type === "Draw" && !drawnLines?.length) ?
             "disabled"
+            : ""
           }`}
         >
-          Reset
+          Limpar
         </button>
         <button
           onClick={handleUndoInteraction}
           className={`${
-            (!svg || segmentTypes === "All" || isMultiMaskMode) && "disabled"
+            type === "AI" ?
+            (!svg) && "disabled"
+            : (!drawnLines?.length) && "disabled"
           }`}
           id="undo-button"
         >
@@ -76,7 +61,9 @@ const SegmentOptions = ({
         <button
           onClick={handleRedoInteraction}
           className={`${
-            (!clicksHistory?.length || segmentTypes === "All") && "disabled"
+            type === "AI" ?
+            (!clicksHistory?.length) && "disabled"
+            : (!drawnLinesHistory?.length) && "disabled"
           }`}
           id="redo-button"
         >

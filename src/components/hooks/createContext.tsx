@@ -154,8 +154,8 @@ interface contextProps {
   ];
   // history of drawn lines
   drawnLinesHistory: [
-    drawnLinesHistory: string[],
-    setDrawnLinesHistory: React.Dispatch<React.SetStateAction<string[]>>
+    drawnLinesHistory: string[] | null,
+    setDrawnLinesHistory: React.Dispatch<React.SetStateAction<string[] | null>>
   ];
 }
 

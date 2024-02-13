@@ -139,7 +139,6 @@ const SvgMask = ({
   const bbHeight = boundingBox?.height;
   const bbMiddleY = bbY && bbHeight && bbY + bbHeight / 2;
   const bbWidthRatio = bbWidth && bbWidth / xScale;
-  // const colors = ['#ff1717', '#1717ff' ,'#ffff17'];
 
 
   return (
@@ -181,25 +180,6 @@ const SvgMask = ({
       <clipPath id={"clip-path"}>
         <path d={allSvg?.map((path) => path.svg).join(" ") || ""} />
       </clipPath>
-      {/* {colors?.map((color, index) => (
-        <filter id={`glow-${color}`} x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={color} />
-          <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={color} />
-        </filter>
-      ))} */}
-      <filter id={`glow-${colorsHold.red}`} x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={colorsHold.red} />
-        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colorsHold.red} />
-      </filter>
-      <filter id={`glow-${colorsHold.blue}`} x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={colorsHold.blue} />
-        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colorsHold.blue} />
-      </filter>
-      <filter id={`glow-${colorsHold.yellow}`} x="-50%" y="-50%" width="200%" height="200%">
-        <feDropShadow dx="0" dy="0" stdDeviation="2" floodColor={colorsHold.yellow} />
-        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor={colorsHold.yellow} />
-      </filter>
-
 
 
       <image

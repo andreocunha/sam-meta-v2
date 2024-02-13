@@ -59,6 +59,7 @@ const Stage = ({
     predMasksHistory: [predMasksHistory, setPredMasksHistory],
     isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
     drawnLines: [drawnLines, setDrawnLines],
+    drawnLinesHistory: [drawnLinesHistory, setDrawnLinesHistory],
     isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
   } = useContext(AppContext)!;
   const [annotations, setAnnotations] = useState<Array<AnnotationProps>>([]);
@@ -132,6 +133,7 @@ const Stage = ({
     if (stickerTabBool) return;
     if (clicksHistory) setClicksHistory(null);
     if (predMasksHistory) setPredMasksHistory(null);
+    if (drawnLinesHistory) setDrawnLinesHistory(null);
     if (segmentTypes !== "Box") return;
     const { x, y } = e.target.getStage().getPointerPosition();
     setNumOfDragEvents(0);
@@ -398,9 +400,20 @@ const Stage = ({
   }, [clicks]);
 
   const handleUndoInteraction = () => {
+    if(isAllowDrawing){
+      // remove last drawn line and add it to history
+      const newDrawnLines = [...drawnLines];
+      const lastDrawnLine = newDrawnLines.pop();
+      const newDrawnLinesHistory = [...(drawnLinesHistory || [])];
+      setDrawnLines(newDrawnLines);
+      if (lastDrawnLine) {
+        newDrawnLinesHistory.push(lastDrawnLine);
+      }
+      setDrawnLinesHistory(newDrawnLinesHistory);
+      return;
+    }
+
     if (predMasks?.length && clicks?.length) {
-      console.log("UNDO")
-      console.log(predMasks)
       const newPredMasks = [...predMasks];
       const oldPredMask = newPredMasks.pop();
       const newPredMasksHistory = [...(predMasksHistory || [])];
@@ -439,6 +452,19 @@ const Stage = ({
   };
 
   const handleRedoInteraction = () => {
+    if(isAllowDrawing){
+      // get last drawn line from history and add it back to drawn lines
+      const newDrawnLines = [...drawnLines];
+      const lastDrawnLine = drawnLinesHistory?.pop();
+      const newDrawnLinesHistory = [...(drawnLinesHistory || [])];
+      setDrawnLines(newDrawnLines);
+      if (lastDrawnLine) {
+        newDrawnLines.push(lastDrawnLine);
+      }
+      setDrawnLinesHistory(newDrawnLinesHistory);
+      return;
+    }
+
     if (
       clicksHistory?.length &&
       prevAnnotaiton?.length &&
