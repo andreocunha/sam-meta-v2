@@ -298,24 +298,14 @@ const Canvas = ({
         ref={containerRef}
       >
         <div
-          className={`Canvas relative ${
+          className={`Canvas relative w-fit h-fit bg-black" ${
             isLoading ? "pointer-events-none" : ""
-          } ${
-            shouldShowAnimation
-              ? "rotate"
-              : isHovering === false
-              ? "unrotate"
-              : ""
-          } ${isMultiMaskMode ? "multi-mask-mode" : ""}`}
-          // style={scaledDimensionsStyle}
+          }`}
+          style={{
+            ...scaledDimensionsStyle,
+            backgroundColor: 'black'
+          }}
         >
-          <div
-            className="relative w-fit h-fit bg-black"
-            style={{
-              width: scaledDimensionsStyle.width,
-              height: scaledDimensionsStyle.height,
-            }}
-          >
           <img
             src={image.src}
             className={`absolute w-full h-auto pointer-events-none ${
@@ -503,7 +493,6 @@ const Canvas = ({
           )}
           </div>
         </div>
-      </div>
     </>
   );
 };
