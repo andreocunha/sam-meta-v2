@@ -2,7 +2,6 @@ import LZString from "lz-string";
 import { InferenceSession, Tensor } from "onnxruntime-web";
 import * as ort from 'onnxruntime-web';
 import { useContext, useEffect, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
 import "./assets/scss/App.scss";
 import getFile from "./components/helpers/getFile";
 import { handleImageScale } from "./components/helpers/ImageHelper";
@@ -59,6 +58,7 @@ const App = () => {
     predMasks: [predMasks, setPredMasks],
     predMasksHistory: [predMasksHistory, setPredMasksHistory],
     isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
+    drawnLines: [drawnLines, setDrawnLines],
   } = useContext(AppContext)!;
   const [model, setModel] = useState<InferenceSession | null>(null);
   const [tensor, setTensor] = useState<Tensor | null>(null);
@@ -345,28 +345,18 @@ const App = () => {
   };
 
   return (
-    <>
-      <Routes>
-        <Route path="*" element={<Navigate replace to="/demo" />} />
-        <Route
-          path="/demo"
-          element={
-            <div className={`flex flex-col h-full overflow-hidden`}>
-              <Stage
-                scale={modelScale}
-                handleResetState={handleResetState}
-                handleMagicErase={() => {}}
-                handleImage={handleImage}
-                hasClicked={hasClicked}
-                setHasClicked={setHasClicked}
-                handleSelectedImage={handleSelectedImage}
-                image={image}
-              />
-            </div>
-          }
-        />
-      </Routes>
-    </>
+    <div className={`flex flex-col h-full w-full overflow-hidden`}>
+      <Stage
+        scale={modelScale}
+        handleResetState={handleResetState}
+        handleMagicErase={() => {}}
+        handleImage={handleImage}
+        hasClicked={hasClicked}
+        setHasClicked={setHasClicked}
+        handleSelectedImage={handleSelectedImage}
+        image={image}
+      />
+    </div>
   );
 };
 

@@ -5,7 +5,6 @@ interface SegmentOptionsProps {
   handleResetInteraction: () => void;
   handleUndoInteraction: () => void;
   handleRedoInteraction: () => void;
-  handleCreateSticker: () => void;
   handleMagicErase: () => void;
   handleImage: (img?: HTMLImageElement) => void;
   hasClicked: boolean;
@@ -17,7 +16,6 @@ const SegmentOptions = ({
   handleResetInteraction,
   handleUndoInteraction,
   handleRedoInteraction,
-  handleCreateSticker,
   handleMagicErase,
   handleImage,
   hasClicked,

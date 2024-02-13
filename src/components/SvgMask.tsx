@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef } from "react";
 import AppContext from "./hooks/createContext";
 import { colorsHold } from "./hooks/createContext";
 
@@ -14,7 +14,6 @@ const SvgMask = ({
   className = "",
 }: SvgMaskProps) => {
   const {
-    click: [click, setClick],
     image: [image],
     isLoading: [isLoading, setIsLoading],
     isErasing: [isErasing, setIsErasing],

@@ -17,8 +17,6 @@ import {
 import AppContext from "./hooks/createContext";
 import ImagePicker from "./ImagePicker";
 import LoadingModal from "./LoadingModal";
-import MobileOptionNavBar from "./MobileOptionNavBar";
-import MobileSegmentDrawer from "./MobileSegmentDrawer";
 import SegmentDrawer from "./SegmentDrawer";
 
 type Points = { sx: number; sy: number; x: number; y: number };
@@ -58,6 +56,8 @@ const Stage = ({
     predMasks: [predMasks, setPredMasks],
     predMasksHistory: [predMasksHistory, setPredMasksHistory],
     isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
+    drawnLines: [drawnLines, setDrawnLines],
+    isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
   } = useContext(AppContext)!;
   const [annotations, setAnnotations] = useState<Array<AnnotationProps>>([]);
   const [newAnnotation, setNewAnnotation] = useState<Array<AnnotationProps>>(
@@ -125,102 +125,8 @@ const Stage = ({
     );
   };
 
-  const handleCreateSticker = () => {
-    if (konvaRef.current === null) return;
-    setIsLoading(true);
-    superDefer(() =>
-      superDefer(() => superDefer(() => superDefer(doHandleCreateSticker)))
-    );
-  };
-
-  const doHandleCreateSticker = () => {
-    if (konvaRef.current === null) return;
-
-    const cropImageFromCanvasTS = (ref: any) => {
-      let newCanvas = null;
-      try {
-        const canvas = ref!.toCanvas().getContext("2d");
-
-        let w = ref.width();
-        let h = ref.height();
-        const pix: { x: number[]; y: number[] } = { x: [], y: [] };
-        const imageData = canvas.getImageData(0, 0, w, h);
-        let x;
-        let y;
-        let index;
-
-        for (y = 0; y < h; y++) {
-          for (x = 0; x < w; x++) {
-            index = (y * w + x) * 4;
-            if (imageData.data[index + 3] > 0) {
-              pix.x.push(x);
-              pix.y.push(y);
-            }
-          }
-        }
-        pix.x.sort(function (a: number, b: number) {
-          return a - b;
-        });
-        pix.y.sort(function (a: number, b: number) {
-          return a - b;
-        });
-        const n = pix.x.length - 1;
-
-        w = 1 + pix.x[n] - pix.x[0];
-        h = 1 + pix.y[n] - pix.y[0];
-        const cut = canvas.getImageData(pix.x[0], pix.y[0], w, h);
-
-        canvas.width = w;
-        canvas.height = h;
-        canvas.putImageData(cut, 0, 0);
-        newCanvas = document.createElement("canvas");
-        newCanvas.width = w;
-        newCanvas.height = h;
-        newCanvas.getContext("2d")!.putImageData(cut, 0, 0);
-      } catch (error) {
-        console.log(error);
-        return;
-      }
-      return newCanvas;
-    };
-
-    const isMobile = window.innerWidth < 768;
-    const konvaClone = konvaRef.current.clone();
-    const svgLayer = konvaClone.findOne(".svgMask");
-    const pathNodes = svgLayer.find("Path");
-    const imageNode = svgLayer.find("Image")[0];
-    if (segmentTypes === "All") {
-      for (const pathNode of pathNodes) {
-        pathNode.attrs.visible = true;
-      }
-    }
-    const newStickers: HTMLCanvasElement[] = [];
-    let counter = 0;
-    konvaClone.findOne(".annotations").hide();
-    konvaClone.findOne(".animateAllSvg").hide();
-    svgLayer.globalCompositeOperation("destination-atop");
-    imageNode.opacity(-1);
-    imageNode.remove();
-    for (const pathNode of pathNodes) {
-      pathNode.opacity(-1).remove();
-    }
-    for (const pathNode of pathNodes) {
-      counter++;
-      svgLayer.add(imageNode);
-      svgLayer.add(pathNode);
-      const newSticker = cropImageFromCanvasTS(konvaClone);
-      if (newSticker) newStickers.push(newSticker);
-      imageNode.remove();
-      pathNode.remove();
-      if (isMobile && counter === MOBILE_CUTOUT_LIMIT) break;
-    }
-    setActiveSticker(0);
-    setStickers([...(newStickers || []), ...(stickers || [])]);
-    handleResetInteraction();
-    setIsLoading(false);
-  };
-
   const handleMouseDown = (e: any) => {
+    console.log("handleMouseDown", isAllowDrawing);
     if (stickerTabBool) return;
     if (clicksHistory) setClicksHistory(null);
     if (predMasksHistory) setPredMasksHistory(null);
@@ -285,7 +191,7 @@ const Stage = ({
         break;
       default:
         break;
-        // return null;
+      // return null;
     }
   };
 
@@ -458,6 +364,7 @@ const Stage = ({
     setPredMasksHistory(null);
     setIsLoading(false);
     setPoints(undefined);
+    setDrawnLines([]);
     if (segmentTypes === "Click" && !forceFullReset) {
       if (!isMultiMaskMode) {
         setHasClicked(false);
@@ -489,11 +396,6 @@ const Stage = ({
   }, [clicks]);
 
   const handleUndoInteraction = () => {
-    if (clicks?.length === 1 && annotations?.length && segmentTypes === "Box") {
-      setPrevAnnotation(annotations);
-      setAnnotations([]);
-      setNewAnnotation([]);
-    }
     if (predMasks?.length && clicks?.length) {
       console.log("UNDO")
       console.log(predMasks)
@@ -576,139 +478,57 @@ const Stage = ({
 
   return (
     <>
-      {isStandalone ? (
-        <>
-          {image && (
-            <div
-              className="relative md:w-full md:h-auto"
-              ref={containerRef}
-              style={
-                window.innerWidth < 768
-                  ? { height: "calc(100vh/2" }
-                  : { height: canvasHeight }
-              }
-            >
-              <Canvas
-                konvaRef={konvaRef}
-                annotations={annotations}
-                newAnnotation={newAnnotation}
-                scale={scale}
-                handleMouseUp={handleMouseUp}
-                handleMouseDown={handleMouseDown}
-                handleMouseMove={handleMouseMove}
-                handleMouseOut={handleMouseOut}
-                containerRef={containerRef}
-                hasClicked={hasClicked}
-                setCanvasScale={setCanvasScale}
-                isStandalone={isStandalone}
-                isHoverToolTip={[isHoverToolTip, setIsHoverToolTip]}
-                allText={[allText, setAllText]}
-              />
-              <div
-                className={`absolute top-0 right-0 bottom-0 left-0 bg-opacity-70 bg-black flex items-center justify-center text-white text-lg font-bold transition-opacity ${
-                  shouldShowHomepageOverlay
-                    ? "opacity-100"
-                    : "opacity-0 pointer-events-none"
-                }`}
-                id="canvas-overlay"
-              >
-                <FeatureSummary
-                  actions={[{ action: "Demo", actionUrl: "/demo" }]}
-                  darkMode
-                  centerAlign
-                >
-                  <h3>Want to keep going?</h3>
-                </FeatureSummary>
-              </div>
-            </div>
+      {image || isToolBarUpload ? (
+        <div className="relative flex items-center justify-center w-full h-full">
+          {showLoadingModal && (
+            <LoadingModal handleResetState={handleResetState} />
           )}
-        </>
+          <SegmentDrawer
+            handleResetState={handleResetState}
+            handleResetInteraction={handleResetInteraction}
+            handleUndoInteraction={handleUndoInteraction}
+            handleRedoInteraction={handleRedoInteraction}
+            handleMagicErase={handleMagicErase}
+            handleImage={handleImage}
+            userNegClickBool={[userNegClickBool, setUserNegClickBool]}
+            handleMultiMaskMode={handleMultiMaskMode}
+            showGallery={[showGallery, setShowGallery]}
+            hasClicked={hasClicked}
+            handleSelectedImage={handleSelectedImage}
+          />
+          <div className="relative flex items-center justify-center w-full h-full"
+            style={{
+              // maxWidth: 1000,
+              // maxHeight: '90vh',
+            }}
+          >
+            {/* <div className="w-full h-full bg-black pointer-events-none background"></div> */}
+            <Canvas
+              konvaRef={konvaRef}
+              annotations={annotations}
+              newAnnotation={newAnnotation}
+              scale={scale}
+              handleMouseUp={handleMouseUp}
+              handleMouseDown={handleMouseDown}
+              handleMouseMove={handleMouseMove}
+              handleMouseOut={handleMouseOut}
+              containerRef={containerRef}
+              hasClicked={hasClicked}
+              setCanvasScale={setCanvasScale}
+              isHoverToolTip={[isHoverToolTip, setIsHoverToolTip]}
+              allText={[allText, setAllText]}
+            />
+          </div>
+        </div>
+      ) : !isToolBarUpload ? (
+        <div className="flex items-stretch justify-center flex-1 overflow-hidden stage">
+          <ImagePicker
+            handleSelectedImage={handleSelectedImage}
+            showGallery={[showGallery, setShowGallery]}
+          />
+        </div>
       ) : (
-        <>
-          {image || isToolBarUpload ? (
-            <div className="flex items-stretch justify-center flex-1 overflow-hidden stage">
-              {showLoadingModal && (
-                <LoadingModal handleResetState={handleResetState} />
-              )}
-              <SegmentDrawer
-                handleResetState={handleResetState}
-                handleResetInteraction={handleResetInteraction}
-                handleUndoInteraction={handleUndoInteraction}
-                handleRedoInteraction={handleRedoInteraction}
-                handleMagicErase={handleMagicErase}
-                handleCreateSticker={handleCreateSticker}
-                handleImage={handleImage}
-                userNegClickBool={[userNegClickBool, setUserNegClickBool]}
-                handleMultiMaskMode={handleMultiMaskMode}
-                showGallery={[showGallery, setShowGallery]}
-                hasClicked={hasClicked}
-                handleSelectedImage={handleSelectedImage}
-              />
-              <div className="relative flex flex-col items-center justify-center flex-1 overflow-hidden md:overflow-visible md:px-12 md:py-9">
-                {/* <div className="absolute top-0 z-30 flex flex-col items-center justify-center w-full md:relative">
-                  <MobileOptionNavBar
-                    handleResetInteraction={handleResetInteraction}
-                    handleUndoInteraction={handleUndoInteraction}
-                    handleRedoInteraction={handleRedoInteraction}
-                    handleResetState={handleResetState}
-                    handleImage={handleImage}
-                    userNegClickBool={[userNegClickBool, setUserNegClickBool]}
-                  />
-                </div> */}
-                <div
-                  className="relative flex-1 w-full mb-3 md:my-7"
-                  ref={containerRef}
-                >
-                  <Profiler
-                    id="Canvas"
-                    onRender={(
-                      id, // the "id" prop of the Profiler tree that has just committed
-                      phase, // either "mount" (if the tree just mounted) or "update" (if it re-rendered)
-                      actualDuration, // time spent rendering the committed update
-                      baseDuration, // estimated time to render the entire subtree without memoization
-                      startTime, // when React began rendering this update
-                      commitTime, // when React committed this update
-                      interactions
-                    ) => {
-                      // console.log(`${id} took ${actualDuration}ms`);
-                    }}
-                  >
-                    <Canvas
-                      konvaRef={konvaRef}
-                      annotations={annotations}
-                      newAnnotation={newAnnotation}
-                      scale={scale}
-                      handleMouseUp={handleMouseUp}
-                      handleMouseDown={handleMouseDown}
-                      handleMouseMove={handleMouseMove}
-                      handleMouseOut={handleMouseOut}
-                      containerRef={containerRef}
-                      hasClicked={hasClicked}
-                      setCanvasScale={setCanvasScale}
-                      isHoverToolTip={[isHoverToolTip, setIsHoverToolTip]}
-                      allText={[allText, setAllText]}
-                    />
-                  </Profiler>
-                </div>
-                <MobileSegmentDrawer
-                  handleResetInteraction={handleResetInteraction}
-                  handleMagicErase={handleMagicErase}
-                  handleCreateSticker={handleCreateSticker}
-                  userNegClickBool={[userNegClickBool, setUserNegClickBool]}
-                />
-              </div>
-            </div>
-          ) : !isToolBarUpload ? (
-            <div className="flex items-stretch justify-center flex-1 overflow-hidden stage">
-              <ImagePicker
-                handleSelectedImage={handleSelectedImage}
-                showGallery={[showGallery, setShowGallery]}
-              />
-            </div>
-          ) : (
-            <></>
-          )}
-        </>
+        <></>
       )}
     </>
   );

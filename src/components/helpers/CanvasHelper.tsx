@@ -39,18 +39,13 @@ const canvasScaleResizer = ({
   containerHeight,
   shouldFitToWidth,
 }: canvasScaleResizerProps) => {
-  const isMobile = window.innerWidth < 768;
   let scale = 1;
   const xScale = containerWidth / width;
   const yScale = containerHeight / height;
-  if (isMobile) {
-    scale = Math.max(xScale, yScale);
+  if (shouldFitToWidth) {
+    scale = xScale;
   } else {
-    if (shouldFitToWidth) {
-      scale = xScale;
-    } else {
-      scale = Math.min(xScale, yScale);
-    }
+    scale = Math.min(xScale, yScale);
   }
   const scaledWidth = scale * width;
   const scaledHeight = scale * height;

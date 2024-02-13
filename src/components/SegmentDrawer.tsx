@@ -11,7 +11,6 @@ interface SegmentDrawerProps {
   handleResetInteraction: (flag?: boolean) => void;
   handleUndoInteraction: () => void;
   handleRedoInteraction: () => void;
-  handleCreateSticker: () => void;
   handleMagicErase: () => void;
   handleImage: (img?: HTMLImageElement) => void;
   handleMultiMaskMode: () => void;
@@ -31,7 +30,6 @@ const SegmentDrawer = ({
   handleResetInteraction,
   handleUndoInteraction,
   handleRedoInteraction,
-  handleCreateSticker,
   handleMagicErase,
   handleImage,
   handleMultiMaskMode,
@@ -235,7 +233,6 @@ const SegmentDrawer = ({
                   handleResetInteraction={handleResetInteraction}
                   handleUndoInteraction={handleUndoInteraction}
                   handleRedoInteraction={handleRedoInteraction}
-                  handleCreateSticker={handleCreateSticker}
                   handleMagicErase={handleMagicErase}
                   handleImage={handleImage}
                   hasClicked={hasClicked}

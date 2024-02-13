@@ -81,6 +81,7 @@ const Canvas = ({
   // custom drawing holds
   const [lines, setLines] = React.useState<any[]>([]);
   const isDrawing = React.useRef(false);
+  const imageRef = React.useRef<HTMLImageElement>(null);
 
   const convertLinesToSVGPath = (scaleX: number, scaleY: number) => {
     if(lines.length === 0) return "";
@@ -159,7 +160,7 @@ const Canvas = ({
   const area = w * h;
   const canvasScale =
     area > MAX_CANVAS_AREA ? Math.sqrt(MAX_CANVAS_AREA / (w * h)) : 1;
-  const canvasDimensions = {
+  let canvasDimensions = {
     width: Math.floor(w * canvasScale),
     height: Math.floor(h * canvasScale),
   };
@@ -184,7 +185,6 @@ const Canvas = ({
   >(null);
   const [hasTouchMoved, setHasTouchMoved] = useState(false);
   const [numOfTouches, setNumOfTouches] = useState(0);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const annotationsToDraw = [...annotations, ...newAnnotation];
   const positiveClickColor = "turquoise";
   const negativeClickColor = "pink";
@@ -203,19 +203,7 @@ const Canvas = ({
   const resizeObserver = new ResizeObserver((entries) => {
     for (const entry of entries) {
       if (entry.target === containerRef.current) {
-        let width;
-        let height;
-        if (entry.contentBoxSize) {
-          // Firefox implements `contentBoxSize` as a single content rect, rather than an array
-          const contentBoxSize = Array.isArray(entry.contentBoxSize)
-            ? entry.contentBoxSize[0]
-            : entry.contentBoxSize;
-          width = contentBoxSize.inlineSize;
-          height = contentBoxSize.blockSize;
-        } else {
-          width = entry.contentRect.width;
-          height = entry.contentRect.height;
-        }
+        const { width, height } = containerRef.current.getBoundingClientRect();
         const resized = canvasScaleResizer({
           width: canvasDimensions.width,
           height: canvasDimensions.height,
@@ -223,10 +211,15 @@ const Canvas = ({
           containerHeight: height,
           shouldFitToWidth: isStandalone,
         });
+        console.log("resized", resized);
         setCanvasWidth(resized.scaledWidth);
         setCanvasHeight(resized.scaledHeight);
-        setScaledDimensionsStyle(resized.scaledDimensionsStyle);
+        setScaledDimensionsStyle({
+          width: resized.scaledWidth,
+          height: resized.scaledHeight,
+        });
         setScalingStyle(resized.scalingStyle);
+        console.log("resized.scalingStyle", resized.scalingStyle);
       }
     }
   });
@@ -270,17 +263,6 @@ const Canvas = ({
   }, [click]);
 
   useEffect(() => {
-    const padding = isStandalone ? 0 : 144; // pt-36 = 36rem = 144px
-    const el = scrollRef.current;
-    if (el) {
-      const maxScrollLeft = resizer.scaledWidth - resizer.containerWidth;
-      const maxScrollTop = resizer.scaledHeight - resizer.containerHeight;
-      el.scrollLeft = maxScrollLeft / 2;
-      el.scrollTop = padding - (maxScrollTop - padding) / 2;
-    }
-  }, [scalingStyle]);
-
-  useEffect(() => {
     if (isHovering && clicks && clicks.length == 1) {
       setShouldShowAnimation(true);
     } else {
@@ -311,11 +293,9 @@ const Canvas = ({
       )}
       {/* mouse event none pointer-events-none */}
       <div
-        className={`absolute w-full h-full overflow-auto Canvas-wrapper md:overflow-visible md:w-auto md:h-auto absolute-center ${
-          !isStandalone ? "pt-36 md:pt-0" : ""
-        }`}
+        className={`absolute flex w-full h-full items-center justify-center`}
         style={(isAllowDrawing && numOfTouches === 1) ? { overflow: "hidden" } : {}}
-        ref={scrollRef}
+        ref={containerRef}
       >
         <div
           className={`Canvas relative ${
@@ -327,18 +307,25 @@ const Canvas = ({
               ? "unrotate"
               : ""
           } ${isMultiMaskMode ? "multi-mask-mode" : ""}`}
-          style={scaledDimensionsStyle}
+          // style={scaledDimensionsStyle}
         >
-          <div className="absolute w-full h-full bg-black pointer-events-none background"></div>
+          <div
+            className="relative w-fit h-fit bg-black"
+            style={{
+              width: scaledDimensionsStyle.width,
+              height: scaledDimensionsStyle.height,
+            }}
+          >
           <img
             src={image.src}
-            className={`absolute w-full h-full pointer-events-none ${
+            className={`absolute w-full h-auto pointer-events-none ${
               isLoading ||
               (svg && svg?.length > 0) || drawnLines.length > 0
                 ? "opacity-40"
                 : ""
             }`}
             style={{ margin: 0 }}
+            ref={imageRef}
           ></img>
           {segmentTypes !== "All" &&
             // svg &&
@@ -514,6 +501,7 @@ const Canvas = ({
               ></RadialProgress>
             </div>
           )}
+          </div>
         </div>
       </div>
     </>

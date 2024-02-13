@@ -152,6 +152,11 @@ interface contextProps {
     drawnLines: string[],
     setDrawnLines: React.Dispatch<React.SetStateAction<string[]>>
   ];
+  // history of drawn lines
+  drawnLinesHistory: [
+    drawnLinesHistory: string[],
+    setDrawnLinesHistory: React.Dispatch<React.SetStateAction<string[]>>
+  ];
 }
 
 const AppContext = createContext<contextProps | null>(null);
