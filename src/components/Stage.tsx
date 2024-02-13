@@ -18,6 +18,8 @@ import AppContext from "./hooks/createContext";
 import ImagePicker from "./ImagePicker";
 import LoadingModal from "./LoadingModal";
 import SegmentDrawer from "./SegmentDrawer";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+
 
 type Points = { sx: number; sy: number; x: number; y: number };
 
@@ -496,29 +498,32 @@ const Stage = ({
             hasClicked={hasClicked}
             handleSelectedImage={handleSelectedImage}
           />
-          <div className="relative flex items-center justify-center w-full h-full"
-            style={{
-              // maxWidth: 1000,
-              // maxHeight: '90vh',
-            }}
-          >
-            {/* <div className="w-full h-full bg-black pointer-events-none background"></div> */}
-            <Canvas
-              konvaRef={konvaRef}
-              annotations={annotations}
-              newAnnotation={newAnnotation}
-              scale={scale}
-              handleMouseUp={handleMouseUp}
-              handleMouseDown={handleMouseDown}
-              handleMouseMove={handleMouseMove}
-              handleMouseOut={handleMouseOut}
-              containerRef={containerRef}
-              hasClicked={hasClicked}
-              setCanvasScale={setCanvasScale}
-              isHoverToolTip={[isHoverToolTip, setIsHoverToolTip]}
-              allText={[allText, setAllText]}
-            />
-          </div>
+          <TransformWrapper disabled={isAllowDrawing}>
+            <TransformComponent>
+              <div className="relative flex items-center justify-center w-full h-full"
+                style={{
+                  width: "100vw",
+                  height: "100vh",
+                }}
+              >
+                <Canvas
+                  konvaRef={konvaRef}
+                  annotations={annotations}
+                  newAnnotation={newAnnotation}
+                  scale={scale}
+                  handleMouseUp={handleMouseUp}
+                  handleMouseDown={handleMouseDown}
+                  handleMouseMove={handleMouseMove}
+                  handleMouseOut={handleMouseOut}
+                  containerRef={containerRef}
+                  hasClicked={hasClicked}
+                  setCanvasScale={setCanvasScale}
+                  isHoverToolTip={[isHoverToolTip, setIsHoverToolTip]}
+                  allText={[allText, setAllText]}
+                />
+              </div>
+            </TransformComponent>
+          </TransformWrapper>
         </div>
       ) : !isToolBarUpload ? (
         <div className="flex items-stretch justify-center flex-1 overflow-hidden stage">
