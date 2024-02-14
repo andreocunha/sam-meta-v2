@@ -1,5 +1,6 @@
-import React, { useContext } from "react";
+import { useContext, useState } from "react";
 import AppContext from "./hooks/createContext";
+import ConfirmationModal from "./ConfirmationModal";
 
 interface SegmentOptionsProps {
   handleResetInteraction: () => void;
@@ -18,24 +19,27 @@ const SegmentOptions = ({
   const {
     svg: [svg, setSVG],
     clicksHistory: [clicksHistory, setClicksHistory],
-    svgs: [svgs, setSVGs],
     drawnLines: [drawnLines, setDrawnLines],
     drawnLinesHistory: [drawnLinesHistory, setDrawnLinesHistory],
   } = useContext(AppContext)!;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openConfirmationModal = () => {
+    // Define as ações do modal aqui, se necessário
+    setIsModalOpen(true);
+  };
+
   return (
     <>
       <div
-        className={`flex justify-between px-4 py-2 my-2 gap-2 text-sm bg-gray-300 rounded-xl`}
+        className={`flex justify-between px-4 py-2 gap-2 text-sm bg-gray-300 rounded-xl`}
         style={{
           color: "black",
           opacity: 0.8,
         }}
       >
         <button
-          onClick={() => {
-            // mostra uma mensagem se quer mesmo limpar (confirmar)
-            window.confirm("Deseja mesmo limpar tudo?") && handleResetInteraction();
-          }}
+          onClick={openConfirmationModal}
           className={`${
             (type === "AI" && !svg) || (type === "Draw" && !drawnLines?.length) ?
             "disabled"
@@ -75,6 +79,16 @@ const SegmentOptions = ({
           </svg>
         </button>
       </div>
+
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        message="Deseja mesmo limpar tudo?"
+        onConfirm={() => {
+          handleResetInteraction();
+          setIsModalOpen(false);
+        }}
+        onCancel={() => setIsModalOpen(false)}
+      />
     </>
   );
 };

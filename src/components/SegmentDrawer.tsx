@@ -1,7 +1,8 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import AppContext from "./hooks/createContext";
 import SegmentOptions from "./SegmentOptions";
 import { colorsHold } from "./hooks/createContext";
+import CreateRouteModal from "./CreateRouteModal";
 
 
 interface SegmentDrawerProps {
@@ -34,6 +35,7 @@ const SegmentDrawer = ({
     holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
     isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
   } = useContext(AppContext)!;
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <section
@@ -129,6 +131,20 @@ const SegmentDrawer = ({
       </div>
 
       <div className="flex flex-col fixed"
+        style={{ top: "10px", left: "10px", color: "black", opacity: 0.8 }}
+      >
+        <button
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+          className="flex flex-row w-fit h-fit px-4 py-2 gap-2 bg-gray-300 rounded-xl items-center justify-center text-sm hover:bg-gray-400 cursor-pointer"
+        >
+          <img src="/assets/save.svg" alt="Save" className="w-4 h-4" />
+          <p>Salvar</p>
+        </button>
+      </div>
+
+      <div className="flex flex-col fixed"
         style={{ top: "10px", right: "10px", width: 140 }}
       >
         {isAllowDrawing ?
@@ -149,6 +165,11 @@ const SegmentDrawer = ({
           )}
       </div>
 
+      <CreateRouteModal 
+        isOpen={isModalOpen} 
+        onCancel={() => setIsModalOpen(false)}
+        onConfirm={() => {}}
+      />
     </section>
   );
 };
