@@ -516,13 +516,6 @@ const Stage = ({
             handleResetInteraction={handleResetInteraction}
             handleUndoInteraction={handleUndoInteraction}
             handleRedoInteraction={handleRedoInteraction}
-            handleMagicErase={handleMagicErase}
-            handleImage={handleImage}
-            userNegClickBool={[userNegClickBool, setUserNegClickBool]}
-            handleMultiMaskMode={handleMultiMaskMode}
-            showGallery={[showGallery, setShowGallery]}
-            hasClicked={hasClicked}
-            handleSelectedImage={handleSelectedImage}
           />
           <TransformWrapper disabled={isAllowDrawing}>
             <TransformComponent>

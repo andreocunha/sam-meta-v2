@@ -25,12 +25,52 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
-    <style>/*
-      ! tailwindcss v3.2.3 | MIT License | https://tailwindcss.com
-      *//*
-      1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
-      2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
-      */
+    <style>
+      .temp-message {
+        display: none;
+        position: fixed;
+        left: 50%;
+        top: 85%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0,0,0,0.7);
+        color: #ffffff;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 16px;
+        z-index: 8000;
+        animation-fill-mode: forwards; /* Mantém o elemento na última frame da animação */
+      }
+      
+      /* Animação de surgimento */
+      .fade-in {
+        animation: fadeIn 0.5s ease-out;
+      }
+      
+      /* Animação de desaparecimento */
+      .fade-out {
+        animation: fadeOut 0.5s ease-out;
+      }
+      
+      /* Keyframes para as animações */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          display: none;
+        }
+      }
+      
       
       *,
       ::before,

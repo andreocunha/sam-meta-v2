@@ -1,6 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
-import { getCookieConsentValue } from "react-cookie-consent";
-import * as ReactGA from "react-ga4";
+import { useContext } from "react";
 import AppContext from "./hooks/createContext";
 import SegmentOptions from "./SegmentOptions";
 import { colorsHold } from "./hooks/createContext";
@@ -11,108 +9,52 @@ interface SegmentDrawerProps {
   handleResetInteraction: (flag?: boolean) => void;
   handleUndoInteraction: () => void;
   handleRedoInteraction: () => void;
-  handleMagicErase: () => void;
-  handleImage: (img?: HTMLImageElement) => void;
-  handleMultiMaskMode: () => void;
-  userNegClickBool: [
-    userNegClickBool: boolean,
-    setUserNegClickBool: (e: boolean) => void
-  ];
-  showGallery: [showGallery: boolean, setShowGallery: (e: boolean) => void];
-  hasClicked: boolean;
-  handleSelectedImage: (
-    data: File | URL,
-    options?: { shouldDownload?: boolean; shouldNotFetchAllModel?: boolean }
-  ) => void;
 }
+
+function showTemporaryMessage(message: string) {
+  const messageElement = document.getElementById('tempMessage');
+  if (messageElement) {
+    messageElement.textContent = message;
+    messageElement.style.display = 'block';
+    messageElement.classList.add('fade-in');
+
+    setTimeout(() => {
+      messageElement!.style.display = 'none';
+    }, 2500);
+  }
+}
+
 
 const SegmentDrawer = ({
   handleResetInteraction,
   handleUndoInteraction,
   handleRedoInteraction,
-  handleMagicErase,
-  handleImage,
-  handleMultiMaskMode,
-  hasClicked,
-  handleSelectedImage,
 }: SegmentDrawerProps) => {
   const {
-    segmentTypes: [segmentTypes, setSegmentTypes],
-    activeSticker: [activeSticker, setActiveSticker],
-    didShowAMGAnimation: [didShowAMGAnimation, setDidShowAMGAnimation],
-    isToolBarUpload: [isToolBarUpload, setIsToolBarUpload],
     holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
     isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
-    drawnLines: [drawnLines, setDrawnLines],
   } = useContext(AppContext)!;
-
-  const [uploadClick, setUploadClick] = useState<boolean>(true);
-  const [visibleClickHover, setVisibleClickHover] = useState<boolean>(false);
-  const [isCutOut, setIsCutOut] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [isClickCollapsed, setIsClickCollapsed] = useState(true);
-  const [isBoxCollapsed, setIsBoxCollapsed] = useState(true);
-  const [isAllCollapsed, setIsAllCollapsed] = useState(true);
-  const [isCutOutCollapsed, setIsCutOutCollapsed] = useState(true);
-  const [isClickMounted, setIsClickMounted] = useState(false);
-  const [isBoxMounted, setIsBoxMounted] = useState(false);
-  const [isAllMounted, setIsAllMounted] = useState(false);
-  const [isCutOutMounted, setIsCutOutMounted] = useState(false);
-  let clickTimeout: string | number | NodeJS.Timeout | undefined;
-
-  const [selectedOption, setSelectedOption] = useState<string>("IA");
-  const [isExpanded, setIsExpanded] = useState(true);
-  const drawRef = useRef<HTMLCanvasElement>(null);
-
-  // Função para alternar entre expandido e minimizado
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const contentStyle = {
-    transition: 'max-height 0.5s ease-in-out',
-    maxHeight: isExpanded ? '500px' : '0px', // Ajuste conforme o conteúdo
-    overflow: 'hidden',
-  };
-
-  useEffect(() => {
-    // if any thing was interacted outside the segment drawer, close it
-    const closeDrawer = (e: MouseEvent | TouchEvent) => {
-      if (drawRef.current && !drawRef.current.contains(e.target as Node)) {
-        setIsExpanded(false);
-      }
-    };
-    document.addEventListener('mousedown', closeDrawer);
-    document.addEventListener('touchstart', closeDrawer);
-    document.addEventListener('scroll', closeDrawer as EventListener);
-
-    return () => {
-      document.removeEventListener('mousedown', closeDrawer);
-      document.removeEventListener('touchstart', closeDrawer);
-      document.removeEventListener('scroll', closeDrawer as EventListener);
-    };
-  }, []);
-
 
   return (
     <section
       className="absolute bottom-0 z-30 flex flex-row w-fit bg-white rounded-xl items-center justify-between"
       style={{ backgroundColor: 'rgba(184, 184, 184, 0.7)', maxWidth: '400px', height: 50, bottom: 0 }}
-      ref={drawRef}
     >
-
+      <div id="tempMessage" className="temp-message">Mensagem Temporária</div>
       <div className="flex flex-row w-fit items-center justify-center px-2 gap-2">
         <button
           onClick={() => {
+            showTemporaryMessage('Click na garra');
             setIsAllowDrawing(false);
           }}
           className="w-10 h-10 bg-white rounded-md"
           style={!isAllowDrawing ? { border: "3px solid #33ff00" } : {border: "3px solid #7c7c7c"}}
         >
-          <img src="/assets/hand.svg" alt="Hand" className="w-full h-auto" />
+          <img src="/assets/touch.svg" alt="Touch" className="w-full h-auto" />
         </button>
         <button
           onClick={() => {
+            showTemporaryMessage('Desenho livre');
             setIsAllowDrawing(true);
           }}
           className="w-10 h-10 bg-white rounded-md"
@@ -129,49 +71,61 @@ const SegmentDrawer = ({
         {/* 3 buttons to holdTypeSelected, red, blue and yellow */}
         <button
           style={{
-            backgroundColor: colorsHold.red,
+            backgroundColor: `rgba(255, 44, 44, 0.4)`,
             borderRadius: "50%",
-            width: "30px",
-            height: "30px",
-            border: holdTypeSelected.color === colorsHold.red ? "3px solid #33ff00" : "none",
+            width: "35px",
+            height: "35px",
+            border: holdTypeSelected.color === colorsHold.red ? `3px solid ${colorsHold.red}` : "none",
             outline: "none",
             cursor: "pointer",
             transform: holdTypeSelected.color === colorsHold.red ? "scale(1.2)" : "none"
           }}
+          className="flex items-center justify-center"
           onClick={() => {
+            showTemporaryMessage('Início/Fim');
             setHoldTypeSelected({ id: 0, color: colorsHold.red });
           }}
-        ></button>
+        >
+          <img src="/assets/flag.svg" alt="Flag" className="w-4 h-4" />
+        </button>
         <button
           style={{
-            backgroundColor: colorsHold.blue,
+            backgroundColor: "rgba(0, 187, 255, 0.4)",
             borderRadius: "50%",
-            width: "30px",
-            height: "30px",
-            border: holdTypeSelected.color === colorsHold.blue ? "3px solid #33ff00" : "none",
+            width: "35px",
+            height: "35px",
+            border: holdTypeSelected.color === colorsHold.blue ? `3px solid ${colorsHold.blue}` : "none",
             outline: "none",
             cursor: "pointer",
             transform: holdTypeSelected.color === colorsHold.blue ? "scale(1.2)" : "none"
           }}
+          className="flex items-center justify-center"
           onClick={() => {
+            showTemporaryMessage('Meio (mão e pé)');
             setHoldTypeSelected({ id: 1, color: colorsHold.blue });
           }}
-        ></button>
+        >
+          <img src="/assets/hand.svg" alt="Hand" className="w-5 h-5" />
+        </button>
         <button
           style={{
-            backgroundColor: colorsHold.yellow,
+            backgroundColor: "rgba(255, 255, 0, 0.4)",
             borderRadius: "50%",
-            width: "30px",
-            height: "30px",
-            border: holdTypeSelected.color === colorsHold.yellow ? "3px solid #33ff00" : "none",
+            width: "35px",
+            height: "35px",
+            border: holdTypeSelected.color === colorsHold.yellow ? `3px solid ${colorsHold.yellow}` : "none",
             outline: "none",
             cursor: "pointer",
             transform: holdTypeSelected.color === colorsHold.yellow ? "scale(1.2)" : "none"
           }}
+          className="flex items-center justify-center"
           onClick={() => {
+            showTemporaryMessage('Somente pé');
             setHoldTypeSelected({ id: 2, color: colorsHold.yellow });
           }}
-        ></button>
+        >
+          <img src="/assets/foot.svg" alt="Foot" className="w-5 h-5" />
+        </button>
       </div>
 
       <div className="flex flex-col fixed"

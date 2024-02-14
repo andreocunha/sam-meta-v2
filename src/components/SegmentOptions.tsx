@@ -33,7 +33,8 @@ const SegmentOptions = ({
       >
         <button
           onClick={() => {
-            handleResetInteraction();
+            // mostra uma mensagem se quer mesmo limpar (confirmar)
+            window.confirm("Deseja mesmo limpar tudo?") && handleResetInteraction();
           }}
           className={`${
             (type === "AI" && !svg) || (type === "Draw" && !drawnLines?.length) ?
