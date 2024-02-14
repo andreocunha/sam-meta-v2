@@ -17,10 +17,6 @@ import {
 import AppContext from "./components/hooks/createContext";
 import Stage from "./components/Stage";
 
-// import figurasPlanas from "./masks/figuras-planas-tensor.json";
-// import cave from "./masks/cave-tensor.json";
-// import sprayWall from "./masks/spray-wall-tensor.json";
-
 ort.env.debug = false;
 // set global logging level
 ort.env.logLevel = 'verbose';
