@@ -316,7 +316,7 @@ const App = () => {
     console.log("handleSegModelResults tensor")
     console.log(tensor)
     setTensor(tensor);
-    // handleSaveMaskAndScale(JSON.stringify(tensor), JSON.stringify(modelScale));
+    handleSaveMaskAndScale(JSON.stringify(tensor), JSON.stringify(modelScale));
 
     // download tensor result to save in file to use in the future
     // const tensorResult = JSON.stringify(tensor);
