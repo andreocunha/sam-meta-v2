@@ -88,18 +88,18 @@ const Stage = ({
     string | React.DOMElement<React.DOMAttributes<HTMLElement>, HTMLElement>
   >("");
 
-  useEffect(() => {
-    if (isStandalone && model) {
-      const url = new URL(HOMEPAGE_IMAGE, location.origin);
-      handleSelectedImage(url, {
-        // shouldDownload: true,
-        shouldNotFetchAllModel: true,
-      });
-    }
-    return () => {
-      handleResetState();
-    };
-  }, [isStandalone, model]);
+  // useEffect(() => {
+  //   if (isStandalone && model) {
+  //     const url = new URL(HOMEPAGE_IMAGE, location.origin);
+  //     handleSelectedImage(url, {
+  //       // shouldDownload: true,
+  //       shouldNotFetchAllModel: true,
+  //     });
+  //   }
+  //   return () => {
+  //     handleResetState();
+  //   };
+  // }, [isStandalone, model]);
 
   useEffect(() => {
     if (isStandalone && clicks && clicks?.length > 0) {
@@ -546,10 +546,10 @@ const Stage = ({
         </div>
       ) : !isToolBarUpload ? (
         <div className="flex items-stretch justify-center flex-1 overflow-hidden stage">
-          <ImagePicker
+          {/* <ImagePicker
             handleSelectedImage={handleSelectedImage}
             showGallery={[showGallery, setShowGallery]}
-          />
+          /> */}
         </div>
       ) : (
         <></>

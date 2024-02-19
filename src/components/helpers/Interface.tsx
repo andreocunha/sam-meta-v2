@@ -136,7 +136,7 @@ export interface StageProps {
   hasClicked: boolean;
   setHasClicked: (e: boolean) => void;
   handleSelectedImage: (
-    data: File | URL,
+    data: File,
     options?: { shouldDownload?: boolean; shouldNotFetchAllModel?: boolean }
   ) => void;
   image: HTMLImageElement | null;

@@ -73,16 +73,16 @@ const ClimbingHoldSvg = ({ fillColor }: { fillColor: string }) => (
 			d="M169.468 2L16.1849 7.20548C16.1849 7.20548 -4.62077 14.363 4.16312 52.1027C6.16628 60.7092 12.7686 59.0056 14.6825 69.0205C15.8137 74.9394 14.5851 78.2526 16.1849 83.9862C19.089 94.3942 30.2112 93.7465 33.7176 99.6027C49.5094 125.977 67.6066 138.336 93.3273 137.993C114.878 137.706 129.895 128.233 143.921 109.363C153.073 97.0495 163.958 95.0479 171.973 74.8767C193.655 20.3087 169.468 2 169.468 2Z" 
 			fill={fillColor} 
 			stroke={darkenHexColor(fillColor, 0.6)} 
-			stroke-width="3" 
-			stroke-linecap="round" 
-			stroke-linejoin="round"
+			strokeWidth="3" 
+			strokeLinecap="round" 
+			strokeLinejoin="round"
 		/>
 		<path 
 			d="M21.6592 18.5C21.6592 18.5 55.1592 26.9912 89.6592 25.5C125.659 23.944 159.159 11.5 159.159 11.5" 
 			stroke={darkenHexColor(fillColor, 0.6)} 
-			stroke-width="3" 
-			stroke-linecap="round" 
-			stroke-linejoin="round"
+			strokeWidth="3" 
+			strokeLinecap="round" 
+			strokeLinejoin="round"
 		/>
 	</svg>
 );

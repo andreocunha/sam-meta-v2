@@ -16,6 +16,8 @@ import {
 } from "./components/helpers/modelAPI";
 import AppContext from "./components/hooks/createContext";
 import Stage from "./components/Stage";
+import { supabase } from "./lib/initSupabase";
+
 
 ort.env.debug = false;
 // set global logging level
@@ -60,6 +62,48 @@ const App = () => {
   const [tensor, setTensor] = useState<Tensor | null>(null);
   const [hasClicked, setHasClicked] = useState<boolean>(false);
   const [modelScale, setModelScale] = useState<modelScaleProps | null>(null);
+  const [loadingImage, setLoadingImage] = useState<boolean>(false);
+
+  const downloadImage = async (image: string, mask: string | null) => {
+    try {
+      const response = await fetch(image);
+      if (!response.ok) throw new Error('Network response was not ok');
+      
+      const blob = await response.blob();
+      const file = new File([blob], image, { type: blob.type });
+      console.log(file);
+      handleSelectedImage(file, mask ? JSON.parse(mask) : undefined);
+    } catch (error) {
+      console.error('Error fetching and handling the image:', error);
+    }
+  }
+
+  const downloadWall = async (wall_id: string) => {
+    try {
+      setLoadingImage(true);
+      const response = await fetch(`https://indoor-climbing-br.vercel.app/api/walls?id=${wall_id}`);
+      const data = await response.json();
+      console.log(data);
+      // download the image as a file
+      await downloadImage(data[0].image, data[0].mask);
+      setLoadingImage(false);
+    } catch (error) {
+      console.log(error);
+      setLoadingImage(false);
+    }
+  }
+
+  // get the params wall_id and auth from the URL
+  useEffect(() => {
+    setLoadingImage(true);
+    const url = new URL(window.location.href);
+    const wall_id = url.searchParams.get("wall_id");
+    console.log("wall_id", wall_id);
+    
+    if(wall_id){
+      downloadWall(wall_id);
+    }
+  }, []);
 
   useEffect(() => {
     const initModel = async () => {
@@ -183,92 +227,98 @@ const App = () => {
   };
 
   const handleSelectedImage = async (
-    data: File | URL,
-    options?: { shouldNotFetchAllModel?: boolean; shouldDownload?: boolean }
+    file: File,
+    jsonData?: any
   ) => {
-
-    let gotString = false;
-    if (data instanceof File) {
-      console.log("GOT FILE " + data.name);
-    } else if (data instanceof URL) {
-      console.log("GOT URL " + data.pathname);
-    } else {
-      console.log("GOT STRING " + data);
-      gotString = true;
-    }
-
     try {
-      const shouldNotFetchAllModel = options?.shouldNotFetchAllModel;
-      const shouldDownload = options?.shouldDownload;
+      console.log("GOT FILE " + file.name);
+  
       handleResetState();
       setShowLoadingModal(true);
-      let imgName: string = "";
-      if (data instanceof URL) {
-        imgName = data.pathname;
-      } else if (data instanceof String) {
-        // TODO: find the right place where to replace it...
-        data = new URL(data.replace('/assets/', '/public/assets/'));
-        imgName = data.pathname;
-      }
-      else {
-        imgName = `${data}`;
-        imgName = imgName.substring(0, imgName.lastIndexOf("."));
-      }
-      imgName = imgName.substring(imgName.lastIndexOf("/") + 1);
+  
+      let imgName = file.name.substring(0, file.name.lastIndexOf("."));
       console.log("imgName", imgName);
-      const imgData: File = data instanceof File ? data : await getFile(data);
+  
+      const imgData: File = file;
       const img = new Image();
       img.src = URL.createObjectURL(imgData);
+  
       img.onload = async () => {
         setIsToolBarUpload(false);
+  
         const { height, width, scale, uploadScale } = handleImageScale(img);
-        setModelScale({
-          onnxScale: scale / uploadScale,
-          maskWidth: width * uploadScale,
-          maskHeight: height * uploadScale,
-          scale: scale,
-          uploadScale: uploadScale,
-          width: width,
-          height: height,
-        });
+          setModelScale({
+            onnxScale: scale / uploadScale,
+            maskWidth: width * uploadScale,
+            maskHeight: height * uploadScale,
+            scale: scale,
+            uploadScale: uploadScale,
+            width: width,
+            height: height,
+          });
+  
         img.width = Math.round(width * scale);
         img.height = Math.round(height * scale);
         setImage(img);
         setPrevImage(img);
-        if(gotString && imgName){
-          // use the image name to load the tensor
-          const jsonData = await loadJsonFile(imgName);
-          const tensorDataArray = Object.values((jsonData as any).data);
+  
+        if (jsonData) {
+          // Usar jsonData fornecido diretamente
+          const tensorDataArray = Object.values(jsonData.data);
           const tensorData = Float32Array.from(tensorDataArray as number[]);
-          const tensorDims = (jsonData as any).dims;
+          const tensorDims = jsonData.dims;
           const tensor = new Tensor("float32", tensorData, tensorDims);
           setTensor(tensor);
-          setIsLoading(false)
           setShowLoadingModal(false);
-        }
-        else{
+        } else {
+          // Chamar o modelo para obter os dados necessários
           setParmsandQueryModel({
-            width,
-            height,
-            uploadScale,
+            width: width,
+            height: height,
+            uploadScale: uploadScale || 1,
             imgData: img,
             handleSegModelResults,
             handleAllModelResults,
             imgName,
-            shouldDownload,
-            shouldNotFetchAllModel,
+            shouldDownload: false,
+            shouldNotFetchAllModel: false,
           });
         }
+        setIsLoading(false);
       };
     } catch (error) {
       console.log(error);
     }
   };
 
+  const handleSaveMaskAndScale = async (mask: string, scale: string) => {
+    console.log("handleSaveMaskAndScale");
+    console.log(mask);
+    console.log(scale);
+
+    const wall_id = new URL(window.location.href).searchParams.get("wall_id")!;
+
+    try {
+      const { error: updateError } = await supabase.from('walls').update({
+        mask: mask,
+        scale: scale,
+      }).eq('id', wall_id);
+      if (updateError){
+        console.log("updateError", updateError);
+      }
+      console.log("Wall updated successfully");
+    } catch (err: any) {
+      console.error('Error updating wall', err.message);
+    }
+
+    setShowLoadingModal(false);
+  }
+
   const handleSegModelResults = ({ tensor }: { tensor: Tensor }) => {
     console.log("handleSegModelResults tensor")
     console.log(tensor)
     setTensor(tensor);
+    handleSaveMaskAndScale(JSON.stringify(tensor), JSON.stringify(modelScale));
     // download tensor result to save in file to use in the future
     // const tensorResult = JSON.stringify(tensor);
     // const blob = new Blob([tensorResult], { type: "application/json" });
@@ -341,7 +391,23 @@ const App = () => {
   };
 
   return (
-    <div className={`flex flex-col h-full w-full overflow-hidden`}>
+    <div className={`flex flex-col h-full w-full overflow-hidden items-center justify-center`}>
+
+      {loadingImage && <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          marginTop: '20%',
+        }}
+      >
+        <img src="https://cdn.dribbble.com/users/192847/screenshots/4000622/jll-anim-3.gif" alt="logo" width="400px" height="400px" />
+        <p style={{ color: "black", fontSize: "24px", fontWeight: "bold" }}>
+          Carregando a imagem da parede...
+        </p>
+      </div>}
+
       <Stage
         scale={modelScale}
         handleResetState={handleResetState}

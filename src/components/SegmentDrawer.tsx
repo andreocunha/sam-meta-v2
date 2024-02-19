@@ -3,6 +3,7 @@ import AppContext from "./hooks/createContext";
 import SegmentOptions from "./SegmentOptions";
 import { colorsHold } from "./hooks/createContext";
 import CreateRouteModal from "./CreateRouteModal";
+import { jwtDecode } from "jwt-decode";
 
 
 interface SegmentDrawerProps {
@@ -167,8 +168,36 @@ const SegmentDrawer = ({
 
       <CreateRouteModal 
         isOpen={isModalOpen} 
+        isAdmin={new URL(window.location.href).searchParams.get("admin") === "1"}
         onCancel={() => setIsModalOpen(false)}
-        onConfirm={() => {}}
+        onConfirm={async (newBoulder) => {
+          console.log(newBoulder);
+          // get the params wall_id and auth from the url
+          const wall_id = new URL(window.location.href).searchParams.get("wall_id")!;
+          const auth = new URL(window.location.href).searchParams.get("auth")!;
+
+          // decode the jwt token
+          const decoded = jwtDecode(auth);
+          console.log(decoded);
+
+          // make a post to http://localhost:3000/api/routes
+          const response = await fetch('https://indoor-climbing-br.vercel.app/api/routes', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              data: {
+                ...newBoulder,
+                creator_id: decoded.sub,
+                wall_id: wall_id,
+              },
+              access_token: new URL(window.location.href).searchParams.get("auth")!
+            }),
+          });
+          const data = await response.json();
+          console.log(data);
+        }}
       />
     </section>
   );

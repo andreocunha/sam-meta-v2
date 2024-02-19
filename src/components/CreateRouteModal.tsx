@@ -4,7 +4,7 @@ import { RouteDifficulty } from "./RouteDifficulty";
 interface CreateRouteModalProps {
   isOpen: boolean;
   isAdmin?: boolean;
-  onConfirm: () => void;
+  onConfirm: (routerData: any) => void;
   onCancel: () => void;
 }
 
@@ -52,15 +52,15 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
     setNewBoulder({ ...newBoulder, [name]: value });
   };
 
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleSubmit = async () => {
+  //   try {
+  //     setLoading(true);
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // Checa se o clique foi no elemento backdrop diretamente
@@ -227,7 +227,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
 
         <div className="flex gap-4 mt-8">
           <button
-            onClick={onConfirm}
+            onClick={() => onConfirm(newBoulder)}
             className="px-4 py-2 text-white rounded"
             style={{
               backgroundColor: "#4355f6",
