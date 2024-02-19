@@ -3,7 +3,6 @@ import { Button, Checkbox } from "react-daisyui";
 import { useDropzone } from "react-dropzone";
 import PhotoAlbum from "react-photo-album";
 import { NavLink } from "react-router-dom";
-import photos from "./helpers/photos";
 import AppContext from "./hooks/createContext";
 export interface ImagePickerProps {
   handleSelectedImage: (
@@ -45,16 +44,6 @@ const ImagePicker = ({
   } = useContext(AppContext)!;
 
   const isMobile = window.innerWidth < 768;
-
-  const downloadAllImageResponses = () => {
-    photos.forEach((photo, i) => {
-      setTimeout(() => {
-        handleSelectedImage(new URL(photo.src, location.origin), {
-          shouldDownload: true,
-        });
-      }, i * 30000);
-    });
-  };
 
   const handleAttemptContinue = () => {
     setAcceptedTerms(true);
@@ -159,12 +148,8 @@ const ImagePicker = ({
 
   return (
     <div className="pt-6 mx-4">
-      {/*!enableDemo && <StarterModal />*/}
-      {/* <Button onClick={downloadAllImageResponses}>
-        Download All Image Responses
-      </Button> */}
+      {/* !enableDemo && <StarterModal />
       <div className="flex flex-row py-5 text-sm align-middle md:text-lg">
-        {/* <AiOutlineArrowDown className="mr-2" /> */}
         <div className="flex items-center">
           <svg
             width="8"
@@ -187,20 +172,7 @@ const ImagePicker = ({
             </button>
           </span>
         </div>
-      </div>
-      <div
-        className={`h-full w-full overflow-y-scroll pb-20 ${
-          showGallery ? "fade-in" : ""
-        }`}
-      >
-        <PhotoAlbum
-          layout={isMobile ? "columns" : "rows"}
-          photos={photos}
-          columns={1}
-          onClick={(e: any) => handleSelectedImage(e.event.target.src)}
-          renderPhoto={image}
-        />
-      </div>
+      </div> */}
     </div>
   );
 };

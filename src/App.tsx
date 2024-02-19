@@ -203,11 +203,6 @@ const App = () => {
     runOnnx();
   }, [clicks, hasClicked]);
 
-  // Função para carregar o arquivo JSON de forma assíncrona
-  const loadJsonFile = async (fileName: string) => {
-    const module = await import(`./masks/${fileName}-tensor.json`);
-    return module.default;
-  };
 
   const handleImage = (img: HTMLImageElement = prevImage!) => {
     // Reset the image, mask and clicks
@@ -237,17 +232,13 @@ const App = () => {
     jsonData?: any
   ) => {
     try {
-      console.log("GOT FILE " + file);
+      console.log("GOT FILE " + file.name);
   
       handleResetState();
       setShowLoadingModal(true);
   
-      let imgName = file.name.substring(0, file.name.lastIndexOf("."));
-      console.log("imgName", imgName);
-  
-      const imgData: File = file;
       const img = new Image();
-      img.src = URL.createObjectURL(imgData);
+      img.src = URL.createObjectURL(file);
   
       img.onload = async () => {
         setIsToolBarUpload(false);
@@ -280,13 +271,13 @@ const App = () => {
           console.log("No JSON data provided");
           // Chamar o modelo para obter os dados necessários
           setParmsandQueryModel({
-            width: width,
-            height: height,
-            uploadScale: uploadScale || 1,
+            width,
+            height,
+            uploadScale,
             imgData: img,
             handleSegModelResults,
             handleAllModelResults,
-            imgName,
+            imgName: "",
             shouldDownload: undefined,
             shouldNotFetchAllModel: undefined,
           });
@@ -325,7 +316,8 @@ const App = () => {
     console.log("handleSegModelResults tensor")
     console.log(tensor)
     setTensor(tensor);
-    handleSaveMaskAndScale(JSON.stringify(tensor), JSON.stringify(modelScale));
+    // handleSaveMaskAndScale(JSON.stringify(tensor), JSON.stringify(modelScale));
+
     // download tensor result to save in file to use in the future
     // const tensorResult = JSON.stringify(tensor);
     // const blob = new Blob([tensorResult], { type: "application/json" });
