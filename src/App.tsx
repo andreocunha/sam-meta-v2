@@ -81,9 +81,15 @@ const App = () => {
   const downloadWall = async (wall_id: string) => {
     try {
       setLoadingImage(true);
-      const response = await fetch(`https://indoor-climbing-br.vercel.app/api/walls?id=${wall_id}`);
-      const data = await response.json();
+      // const response = await fetch(`https://indoor-climbing-br.vercel.app/api/walls?id=${wall_id}`);
+      // get from supabase
+      const { data, error } = await supabase.from('walls').select().eq('id', wall_id);
       console.log(data);
+      if(error){
+        console.log("error", error);
+        setLoadingImage(false);
+        return;
+      }
       // download the image as a file
       await downloadImage(data[0].image, data[0].mask);
       setLoadingImage(false);
@@ -231,7 +237,7 @@ const App = () => {
     jsonData?: any
   ) => {
     try {
-      console.log("GOT FILE " + file.name);
+      console.log("GOT FILE " + file);
   
       handleResetState();
       setShowLoadingModal(true);
@@ -271,6 +277,7 @@ const App = () => {
           setTensor(tensor);
           setShowLoadingModal(false);
         } else {
+          console.log("No JSON data provided");
           // Chamar o modelo para obter os dados necessários
           setParmsandQueryModel({
             width: width,
@@ -280,8 +287,8 @@ const App = () => {
             handleSegModelResults,
             handleAllModelResults,
             imgName,
-            shouldDownload: false,
-            shouldNotFetchAllModel: false,
+            shouldDownload: undefined,
+            shouldNotFetchAllModel: undefined,
           });
         }
         setIsLoading(false);
