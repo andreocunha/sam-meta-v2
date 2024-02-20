@@ -53,16 +53,6 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
     setNewBoulder({ ...newBoulder, [name]: value });
   };
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     setLoading(true);
-  //   } catch (error) {
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     // Checa se o clique foi no elemento backdrop diretamente
     if (event.target === event.currentTarget) {
@@ -90,7 +80,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center h-full"
+      className="fixed inset-0 flex justify-center items-center h-full overflow-y-auto"
       style={{
         backgroundColor: "rgba(0, 0, 0, 0.7)",
       }}

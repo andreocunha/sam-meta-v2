@@ -133,8 +133,8 @@ const SegmentDrawer = ({
         </button>
       </div>
 
-      <div className="flex flex-col fixed"
-        style={{ top: "10px", left: "10px", color: "black", opacity: 0.8 }}
+      {/* <div className="flex flex-col fixed"
+        style={{ top: "5px", right: "10px", color: "black", opacity: 0.8 }}
       >
         <button
           onClick={() => {
@@ -145,10 +145,10 @@ const SegmentDrawer = ({
           <img src="/assets/save.svg" alt="Save" className="w-4 h-4" />
           <p>Salvar</p>
         </button>
-      </div>
+      </div> */}
 
       <div className="flex flex-col fixed"
-        style={{ top: "10px", right: "10px", width: 140 }}
+        style={{ top: "10px", right: "10px" }}
       >
         {isAllowDrawing ?
           <SegmentOptions
@@ -156,6 +156,9 @@ const SegmentDrawer = ({
             handleResetInteraction={handleResetInteraction}
             handleUndoInteraction={handleUndoInteraction}
             handleRedoInteraction={handleRedoInteraction}
+            handleSaveInteraction={() => {
+              setIsModalOpen(true);
+            }}
           />
           :
           (
@@ -164,6 +167,9 @@ const SegmentDrawer = ({
               handleResetInteraction={handleResetInteraction}
               handleUndoInteraction={handleUndoInteraction}
               handleRedoInteraction={handleRedoInteraction}
+              handleSaveInteraction={() => {
+                setIsModalOpen(true);
+              }}
             />
           )}
       </div>
