@@ -398,13 +398,12 @@ const App = () => {
           justifyContent: 'center',
           alignItems: 'center',
           flexDirection: 'column',
-          marginTop: '20%',
+          marginTop: 'auto',
+          marginBottom: 'auto',
+          height: '100vh',
         }}
       >
-        <img src="https://cdn.dribbble.com/users/192847/screenshots/4000622/jll-anim-3.gif" alt="logo" width="400px" height="400px" />
-        <p style={{ color: "black", fontSize: "24px", fontWeight: "bold" }}>
-          Carregando a imagem da parede...
-        </p>
+        <img src="https://media.tenor.com/JBgYqrobdxsAAAAi/loading.gif" alt="logo" width="100px" height="100px" />
       </div>}
 
       <Stage

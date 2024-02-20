@@ -157,6 +157,12 @@ interface contextProps {
     drawnLinesHistory: string[] | null,
     setDrawnLinesHistory: React.Dispatch<React.SetStateAction<string[] | null>>
   ];
+  allSvg: [
+    allSvg: { svg: string; color: string }[] | null,
+    setAllSvg: React.Dispatch<
+      React.SetStateAction<{ svg: string; color: string }[] | null>
+    >
+  ];
 }
 
 const AppContext = createContext<contextProps | null>(null);

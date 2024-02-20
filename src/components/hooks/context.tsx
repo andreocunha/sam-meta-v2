@@ -63,6 +63,10 @@ const AppContextProvider = (props: {
   const [isAllowDrawing, setIsAllowDrawing] = useState<boolean>(false);
   const [drawnLines, setDrawnLines] = React.useState<string[]>([]);
   const [drawnLinesHistory, setDrawnLinesHistory] = React.useState<string[] | null>(null);
+  const [allSvg, setAllSvg] = useState<{
+    svg: string;
+    color: string;
+  }[] | null>(null);
 
   return (
     <AppContext.Provider
@@ -106,6 +110,7 @@ const AppContextProvider = (props: {
         isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
         drawnLines: [drawnLines, setDrawnLines],
         drawnLinesHistory: [drawnLinesHistory, setDrawnLinesHistory],
+        allSvg: [allSvg, setAllSvg],
       }}
     >
       {props.children}

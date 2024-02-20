@@ -61,6 +61,7 @@ const Stage = ({
     drawnLines: [drawnLines, setDrawnLines],
     drawnLinesHistory: [drawnLinesHistory, setDrawnLinesHistory],
     isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
+    allSvg: [allSvg, setAllSvg],
   } = useContext(AppContext)!;
   const [annotations, setAnnotations] = useState<Array<AnnotationProps>>([]);
   const [newAnnotation, setNewAnnotation] = useState<Array<AnnotationProps>>(
@@ -87,19 +88,6 @@ const Stage = ({
   const [allText, setAllText] = useState<
     string | React.DOMElement<React.DOMAttributes<HTMLElement>, HTMLElement>
   >("");
-
-  // useEffect(() => {
-  //   if (isStandalone && model) {
-  //     const url = new URL(HOMEPAGE_IMAGE, location.origin);
-  //     handleSelectedImage(url, {
-  //       // shouldDownload: true,
-  //       shouldNotFetchAllModel: true,
-  //     });
-  //   }
-  //   return () => {
-  //     handleResetState();
-  //   };
-  // }, [isStandalone, model]);
 
   useEffect(() => {
     if (isStandalone && clicks && clicks?.length > 0) {
@@ -355,6 +343,7 @@ const Stage = ({
   const handleResetInteraction = (forceFullReset?: boolean) => {
     setSVG(null);
     setSVGs(null);
+    setAllSvg(null);
     setClick(null);
     setClicks(null);
     setAnnotations([]);
@@ -377,18 +366,6 @@ const Stage = ({
       setHasClicked(false);
       setIsMultiMaskMode(false);
     }
-  };
-
-  const handleMultiMaskMode = () => {
-    if (!isMultiMaskMode) {
-      if (clicks && clicks.length > 1) {
-        handleResetInteraction();
-      }
-      setHasClicked(true);
-    } else if (!clicks) {
-      setHasClicked(false);
-    }
-    setIsMultiMaskMode(!isMultiMaskMode);
   };
 
   useEffect(() => {

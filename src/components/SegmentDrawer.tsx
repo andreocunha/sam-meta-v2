@@ -35,8 +35,10 @@ const SegmentDrawer = ({
   const {
     holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
     isAllowDrawing: [isAllowDrawing, setIsAllowDrawing],
+    allSvg: [allSvg, setAllSvg],
   } = useContext(AppContext)!;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasCreatedRoute, setHasCreatedRoute] = useState(false);
 
   return (
     <section
@@ -138,7 +140,7 @@ const SegmentDrawer = ({
           onClick={() => {
             setIsModalOpen(true);
           }}
-          className="flex flex-row w-fit h-fit px-4 py-2 gap-2 bg-gray-300 rounded-xl items-center justify-center text-sm hover:bg-gray-400 cursor-pointer"
+          className={`flex flex-row w-fit h-fit px-4 py-2 gap-2 bg-gray-300 rounded-xl items-center justify-center text-sm hover:bg-gray-400 cursor-pointer ${(allSvg && allSvg?.length > 0 ) ? "" : "disabled"}`}
         >
           <img src="/assets/save.svg" alt="Save" className="w-4 h-4" />
           <p>Salvar</p>
@@ -166,6 +168,25 @@ const SegmentDrawer = ({
           )}
       </div>
 
+      {/* modal to show that create route success */}
+      {hasCreatedRoute && 
+      <div>
+        <div className="fixed inset-0 flex justify-center items-center"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+        >
+          <div className="bg-white p-4 rounded-lg shadow-lg flex flex-col items-center">
+            <p>Rota criada com sucesso!</p>
+            <div className="mt-4 flex gap-4">
+              <button onClick={() => setHasCreatedRoute(false)} className="px-4 py-2 text-white rounded"
+                style={{ backgroundColor: "#505050" }}
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>}
+
       <CreateRouteModal 
         isOpen={isModalOpen} 
         isAdmin={new URL(window.location.href).searchParams.get("admin") === "1"}
@@ -180,23 +201,33 @@ const SegmentDrawer = ({
           const decoded = jwtDecode(auth);
           console.log(decoded);
 
-          // make a post to http://localhost:3000/api/routes
-          const response = await fetch('https://indoor-climbing-br.vercel.app/api/routes', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              data: {
-                ...newBoulder,
-                creator_id: decoded.sub,
-                wall_id: wall_id,
+          try {
+            // make a post to http://localhost:3000/api/routes
+            const response = await fetch('https://indoor-climbing-br.vercel.app/api/routes', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
               },
-              access_token: new URL(window.location.href).searchParams.get("auth")!
-            }),
-          });
-          const data = await response.json();
-          console.log(data);
+              body: JSON.stringify({
+                data: {
+                  ...newBoulder,
+                  creator_id: decoded.sub,
+                  wall_id: wall_id,
+                  coordinates: allSvg,
+                  image_id: new URL(window.location.href).searchParams.get("image_id")!,
+                },
+                access_token: new URL(window.location.href).searchParams.get("auth")!
+              }),
+            });
+            const data = await response.json();
+            console.log(data);
+            setIsModalOpen(false);
+            handleResetInteraction();
+            setHasCreatedRoute(true);
+          }
+          catch (error) {
+            console.log(error);
+          }
         }}
       />
     </section>

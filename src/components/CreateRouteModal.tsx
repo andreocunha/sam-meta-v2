@@ -4,31 +4,32 @@ import { RouteDifficulty } from "./RouteDifficulty";
 interface CreateRouteModalProps {
   isOpen: boolean;
   isAdmin?: boolean;
-  onConfirm: (routerData: any) => void;
+  onConfirm: (routerData: any) => Promise<void>;
   onCancel: () => void;
 }
 
 const boulderGrades = [
-  "Sem grau definido",
-  "V0-", "V0", "V0+",
-  "V1-", "V1", "V1+",
-  "V2-", "V2", "V2+",
-  "V3-", "V3", "V3+",
-  "V4-", "V4", "V4+",
-  "V5-", "V5", "V5+",
-  "V6-", "V6", "V6+",
-  "V7-", "V7", "V7+",
-  "V8-", "V8", "V8+",
-  "V9-", "V9", "V9+",
-  "V10-", "V10", "V10+",
-  "V11-", "V11", "V11+",
-  "V12-", "V12", "V12+",
-  "V13-", "V13", "V13+",
-  "V14-", "V14", "V14+",
-  "V15-", "V15", "V15+",
-  "V16-", "V16", "V16+",
-  "V17-", "V17", "V17+",
+  { value: "", name: "Sem grau definido" },
+  { value: "V0-", name: "V0-" }, { value: "V0", name: "V0" }, { value: "V0+", name: "V0+" },
+  { value: "V1-", name: "V1-" }, { value: "V1", name: "V1" }, { value: "V1+", name: "V1+" },
+  { value: "V2-", name: "V2-" }, { value: "V2", name: "V2" }, { value: "V2+", name: "V2+" },
+  { value: "V3-", name: "V3-" }, { value: "V3", name: "V3" }, { value: "V3+", name: "V3+" },
+  { value: "V4-", name: "V4-" }, { value: "V4", name: "V4" }, { value: "V4+", name: "V4+" },
+  { value: "V5-", name: "V5-" }, { value: "V5", name: "V5" }, { value: "V5+", name: "V5+" },
+  { value: "V6-", name: "V6-" }, { value: "V6", name: "V6" }, { value: "V6+", name: "V6+" },
+  { value: "V7-", name: "V7-" }, { value: "V7", name: "V7" }, { value: "V7+", name: "V7+" },
+  { value: "V8-", name: "V8-" }, { value: "V8", name: "V8" }, { value: "V8+", name: "V8+" },
+  { value: "V9-", name: "V9-" }, { value: "V9", name: "V9" }, { value: "V9+", name: "V9+" },
+  { value: "V10-", name: "V10-" }, { value: "V10", name: "V10" }, { value: "V10+", name: "V10+" },
+  { value: "V11-", name: "V11-" }, { value: "V11", name: "V11" }, { value: "V11+", name: "V11+" },
+  { value: "V12-", name: "V12-" }, { value: "V12", name: "V12" }, { value: "V12+", name: "V12+" },
+  { value: "V13-", name: "V13-" }, { value: "V13", name: "V13" }, { value: "V13+", name: "V13+" },
+  { value: "V14-", name: "V14-" }, { value: "V14", name: "V14" }, { value: "V14+", name: "V14+" },
+  { value: "V15-", name: "V15-" }, { value: "V15", name: "V15" }, { value: "V15+", name: "V15+" },
+  { value: "V16-", name: "V16-" }, { value: "V16", name: "V16" }, { value: "V16+", name: "V16+" },
+  { value: "V17-", name: "V17-" }, { value: "V17", name: "V17" }, { value: "V17+", name: "V17+" },
 ];
+
 
 const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: CreateRouteModalProps) => {
   const [newBoulder, setNewBoulder] = useState({
@@ -69,6 +70,22 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
     }
   };
 
+  const resetForm = () => {
+    setNewBoulder({
+      wall_id: '',
+      name: '',
+      description: '',
+      score_non_flash: 0,
+      score_flash: 0,
+      color: '#cccccc',
+      difficulty: '',
+      difficulty_color: '#ffffff',
+      coordinates: {},
+      creator_id: '',
+      removal_date: new Date().toISOString().split('T')[0]
+    });
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -79,15 +96,13 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
       }}
       onClick={handleBackdropClick}
     >
-      <div className="bg-white w-full h-full p-4 rounded-lg shadow-lg flex flex-col items-center"
-        style={{
-          maxWidth: "500px",
-          overflowY: "auto",
-          maxHeight: isAdmin ? "760px" : "520px",
-        }}
+      <div className="bg-white w-full h-full p-4 flex flex-col items-center overflow-y-auto"
       >
-
-        <div className="w-full">
+        <div className="w-full"
+          style={{
+            maxWidth: 400,
+          }}
+        >
           <div className="flex flex-row w-full items-center justify-center">
             <div className="w-full flex flex-wrap gap-4 justify-between"
               style={{
@@ -147,7 +162,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
               className="mt-1 block w-full h-10 border border-gray-300 rounded-md shadow-sm p-2"
             >
               {boulderGrades.map((grade) => (
-                <option key={grade} value={grade}>{grade}</option>
+                <option key={grade.name} value={grade.value}>{grade.name}</option>
               ))}
             </select>
           </div>
@@ -225,22 +240,32 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
 
 
 
-        <div className="flex gap-4 mt-8">
+        <div className="flex gap-4 mt-8 mb-4">
           <button
-            onClick={() => onConfirm(newBoulder)}
-            className="px-4 py-2 text-white rounded"
+            onClick={async () => {
+              setLoading(true);
+              await onConfirm(newBoulder);
+              setLoading(false);
+              resetForm();
+            }}
+            className={`px-4 py-2 text-white rounded ${loading ? "disabled": ""}`}
             style={{
               backgroundColor: "#4355f6",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
+            disabled={loading}
           >
-            Salvar
+            {loading ? "Salvando..." : "Salvar"}
           </button>
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-white rounded"
+            className={`px-4 py-2 text-white rounded ${loading ? "disabled": ""}`}
             style={{
               backgroundColor: "#6d6d6d",
+          opacity: loading ? 0.5 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
             }}
+            disabled={loading}
           >
             Cancelar
           </button>

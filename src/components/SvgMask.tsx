@@ -21,6 +21,7 @@ const SvgMask = ({
     isMultiMaskMode: [isMultiMaskMode, setIsMultiMaskMode],
     holdTypeSelected: [holdTypeSelected, setHoldTypeSelected],
     drawnLines: [drawnLines, setDrawnLines],
+    allSvg: [allSvg, setAllSvg],
   } = useContext(AppContext)!;
   const [key, setKey] = useState(Math.random());
   const [boundingBox, setBoundingBox] = useState<DOMRect | undefined>(
@@ -31,10 +32,6 @@ const SvgMask = ({
     if (!pathRef?.current) return;
     setBoundingBox(pathRef.current.getBBox());
   };
-  const [allSvg, setAllSvg] = useState<{
-    svg: string;
-    color: string;
-  }[] | null>(null);
   const [allSvgAI, setAllSvgAI] = useState<{
     svg: string;
     color: string;
