@@ -80,7 +80,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center h-full overflow-y-auto"
+      className="fixed inset-0 flex justify-center items-center h-screen overflow-y-auto"
       style={{
         backgroundColor: "rgba(0, 0, 0, 0.7)",
       }}
@@ -168,6 +168,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
               onChange={handleChange}
               className="mt-1 p-2 block w-full h-10 border border-gray-300 rounded-md shadow-sm"
               placeholder="Ex.: Boulder do João"
+              maxLength={50}
             />
           </div>
 
@@ -178,10 +179,11 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
               name="description"
               value={newBoulder.description}
               onChange={handleChange}
-              rows={3}
+              rows={2}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
               style={{ resize: "none" }}
               placeholder="Ex.: Boulder com agarras pequenas e regletes"
+              maxLength={200}
             />
           </div>
           
@@ -230,7 +232,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
 
 
 
-        <div className="flex gap-4 mt-8 mb-4">
+        <div className="flex gap-4 mt-8 mb-8">
           <button
             onClick={async () => {
               setLoading(true);
