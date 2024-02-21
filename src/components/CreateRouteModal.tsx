@@ -83,6 +83,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
       className="fixed inset-0 flex justify-center items-center h-screen overflow-y-auto"
       style={{
         backgroundColor: "rgba(0, 0, 0, 0.7)",
+        zIndex: 30000,
       }}
       onClick={handleBackdropClick}
     >
