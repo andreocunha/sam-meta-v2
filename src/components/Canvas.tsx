@@ -324,7 +324,7 @@ const Canvas = ({
             className={`absolute w-full h-auto pointer-events-none ${
               isLoading ||
               (svg && svg?.length > 0) || drawnLines.length > 0
-                ? "opacity-40"
+                ? "opacity-60"
                 : ""
             }`}
             style={{ margin: 0 }}

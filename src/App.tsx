@@ -403,7 +403,7 @@ const App = () => {
           height: '100vh',
         }}
       >
-        <img src="https://media.tenor.com/JBgYqrobdxsAAAAi/loading.gif" alt="logo" width="100px" height="100px" />
+        <img src="/assets/loading.gif" alt="Carregando" width="500px" height="500px" />
       </div>}
 
       <Stage

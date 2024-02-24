@@ -196,16 +196,15 @@ const SegmentDrawer = ({
       <CreateRouteModal 
         isOpen={isModalOpen} 
         isAdmin={new URL(window.location.href).searchParams.get("admin") === "1"}
+        creatorId={jwtDecode(new URL(window.location.href).searchParams.get("auth")!).sub!}
         onCancel={() => setIsModalOpen(false)}
         onConfirm={async (newBoulder) => {
-          console.log(newBoulder);
           // get the params wall_id and auth from the url
           const wall_id = new URL(window.location.href).searchParams.get("wall_id")!;
-          const auth = new URL(window.location.href).searchParams.get("auth")!;
+          // const auth = new URL(window.location.href).searchParams.get("auth")!;
 
-          // decode the jwt token
-          const decoded = jwtDecode(auth);
-          console.log(decoded);
+          // // decode the jwt token
+          // const decoded = jwtDecode(auth);
 
           try {
             // make a post to http://localhost:3000/api/routes
@@ -217,7 +216,7 @@ const SegmentDrawer = ({
               body: JSON.stringify({
                 data: {
                   ...newBoulder,
-                  creator_id: decoded.sub,
+                  // creator_id: decoded.sub,
                   wall_id: wall_id,
                   coordinates: allSvg,
                   image_id: new URL(window.location.href).searchParams.get("image_id")!,

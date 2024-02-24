@@ -1,11 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RouteDifficulty } from "./RouteDifficulty";
+import Select from 'react-select';
+import { supabase } from "../lib/initSupabase";
+import { jwtDecode } from "jwt-decode";
 
 interface CreateRouteModalProps {
   isOpen: boolean;
   isAdmin?: boolean;
+  creatorId: string;
   onConfirm: (routerData: any) => Promise<void>;
   onCancel: () => void;
+}
+
+interface AdminListProps {
+  user_id: string;
+  name: string;
+  photo: string;
+  admin_email: string;
 }
 
 const boulderGrades = [
@@ -30,8 +41,17 @@ const boulderGrades = [
   { value: "V17-", name: "V17-" }, { value: "V17", name: "V17" }, { value: "V17+", name: "V17+" },
 ];
 
+const difficultyColorOptions = [
+  { label: "Branca", value: "#FFFFFF" },
+  { label: "Amarela", value: "#ffde00" },
+  { label: "Verde", value: "#07b85d" },
+  { label: "Azul", value: "#0095ff" },
+  { label: "Vermelha", value: "#d9212a" },
+  { label: "Preta", value: "#000000" },
+];
 
-const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: CreateRouteModalProps) => {
+
+const CreateRouteModal = ({ isOpen, creatorId, onConfirm, onCancel, isAdmin=false }: CreateRouteModalProps) => {
   const [newBoulder, setNewBoulder] = useState({
     wall_id: '',
     name: '',
@@ -42,11 +62,13 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
     difficulty: '',
     difficulty_color: '#ffffff',
     coordinates: {},
-    creator_id: '',
+    creator_id: creatorId,
     removal_date: new Date().toISOString().split('T')[0]
   });
 
+  const [adminsList, setAdminsList] = useState<AdminListProps[]>([]);
   const [loading, setLoading] = useState(false);
+  
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -59,6 +81,25 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
       onCancel();
     }
   };
+
+  const getAdminsList = async () => {
+    if(!isAdmin) return
+    try {
+      const { data, error } = await supabase.rpc('get_gym_admins_details',{
+        id: "1058d9a4-1659-4441-8a5c-b7fe3b7a988d"
+      })
+      if(error) return
+      setAdminsList(data)
+    }
+    catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    if(!isAdmin) return;
+    getAdminsList()
+  },[])
 
   const resetForm = () => {
     setNewBoulder({
@@ -87,7 +128,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
       }}
       onClick={handleBackdropClick}
     >
-      <div className="bg-white w-full h-full p-4 flex flex-col items-center overflow-y-auto"
+      <div className="bg-white w-full h-full p-4 pt-6 flex flex-col items-center overflow-y-auto"
       >
         <div className="w-full"
           style={{
@@ -98,7 +139,7 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
             <div className="w-full flex flex-wrap gap-4 justify-between"
               style={{
                 alignItems: "end",
-                maxWidth: 280,
+                maxWidth: 350,
                 alignSelf: "center",
                 justifySelf: "center",
               }}
@@ -122,13 +163,11 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
 
               <div>
                 <label htmlFor="difficulty_color" className="block text-sm font-medium text-gray-700">Cor dificuldade</label>
-                <input
-                  type="color"
-                  name="difficulty_color"
-                  id="difficulty_color"
-                  value={newBoulder.difficulty_color}
-                  onChange={handleChange}
-                  className="mt-1 block border w-full h-10 rounded-md shadow-sm"
+                <Select
+                  options={difficultyColorOptions}
+                  value={difficultyColorOptions.find((option) => option.value === newBoulder.difficulty_color)}
+                  onChange={(option) => setNewBoulder({ ...newBoulder, difficulty_color: option?.value || '#ffffff' })}
+                  className="mt-1 block w-fit h-10 border border-gray-300 rounded-md shadow-sm"
                 />
               </div>
             </div>
@@ -187,10 +226,36 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
               maxLength={200}
             />
           </div>
+
+          {isAdmin && <div className="mt-4">
+              <label htmlFor="removal_date" className="block text-sm font-medium text-neutral-800">Selecione o criador da rota</label>
+              <select
+                id="creator_id"
+                name="creator_id"
+                value={newBoulder.creator_id}
+                onChange={handleChange}
+                className="mt-1 block w-full h-10 border border-gray-300 rounded-md shadow-sm p-2"
+                tabIndex={6}
+              >
+                {adminsList.map((admin) => (
+                  <option key={admin.user_id} value={admin.user_id}>{admin.name}</option>
+                ))}
+              </select>
+            </div>}
           
-          {isAdmin && <div className="flex flex-col w-full gap-4 mt-4">
-            <div className="w-full">
-              <label htmlFor="score_flash" className="block text-sm font-medium text-gray-700">Pontuação flash</label>
+          {isAdmin && <div className="flex flex-row w-full gap-4 mt-4"
+            style={{
+              alignItems: "end",
+              alignSelf: "center",
+              justifySelf: "center",
+            }}
+          >
+            <div className="w-full text-center"
+              style={{
+                maxWidth: 70,
+              }}
+            >
+              <label htmlFor="score_flash" className="block text-sm font-medium text-gray-700">Flash (pts)</label>
               <input
                 type="number"
                 name="score_flash"
@@ -202,8 +267,12 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
               />
             </div>
 
-            <div>
-              <label htmlFor="score_non_flash" className="block text-sm font-medium text-gray-700">Pontuação não flash</label>
+            <div className="w-full text-center"
+              style={{
+                maxWidth: 100,
+              }}
+            >
+              <label htmlFor="score_non_flash" className="block text-sm font-medium text-gray-700">Não flash (pts)</label>
               <input
                 type="number"
                 name="score_non_flash"
@@ -215,18 +284,21 @@ const CreateRouteModal = ({ isOpen, onConfirm, onCancel, isAdmin=false }: Create
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="removal_date" className="block text-sm font-medium text-gray-700">Data de remoção</label>
-                <input
-                  type="date"
-                  name="removal_date"
-                  id="removal_date"
-                  value={newBoulder.removal_date}
-                  onChange={handleChange}
-                  className="mt-1 p-2 block w-full h-10 border border-gray-300 rounded-md shadow-sm"
-                />
-              </div>
+            <div
+              className="w-full"
+              style={{
+                maxWidth: 125,
+              }}
+            >
+              <label htmlFor="removal_date" className="block text-sm font-medium text-gray-700">Data de remoção</label>
+              <input
+                type="date"
+                name="removal_date"
+                id="removal_date"
+                value={newBoulder.removal_date}
+                onChange={handleChange}
+                className="mt-1 p-2 block w-full h-10 border border-gray-300 rounded-md shadow-sm"
+              />
             </div>
           </div>}
         </div>
