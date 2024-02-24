@@ -494,7 +494,7 @@ const Stage = ({
             handleUndoInteraction={handleUndoInteraction}
             handleRedoInteraction={handleRedoInteraction}
           />
-          <TransformWrapper disabled={isAllowDrawing}>
+          <TransformWrapper disabled={isAllowDrawing} maxScale={25}>
             <TransformComponent>
               <div className="relative flex items-center justify-center w-full h-full"
                 style={{
