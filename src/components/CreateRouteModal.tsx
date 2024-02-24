@@ -112,7 +112,7 @@ const CreateRouteModal = ({ isOpen, creatorId, onConfirm, onCancel, isAdmin=fals
       difficulty: '',
       difficulty_color: '#ffffff',
       coordinates: {},
-      creator_id: '',
+      creator_id: creatorId,
       removal_date: new Date().toISOString().split('T')[0]
     });
   }

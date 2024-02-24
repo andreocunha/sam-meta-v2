@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AppContext from "./hooks/createContext";
 import SegmentOptions from "./SegmentOptions";
 import { colorsHold } from "./hooks/createContext";
@@ -39,6 +39,14 @@ const SegmentDrawer = ({
   } = useContext(AppContext)!;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasCreatedRoute, setHasCreatedRoute] = useState(false);
+  const [creatorId, setCreatorId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const auth = new URL(window.location.href).searchParams.get("auth")!;
+    // decode the jwt token
+    const decoded = jwtDecode(auth);
+    setCreatorId(decoded.sub!);
+  }, []);
 
   return (
     <section
@@ -133,20 +141,6 @@ const SegmentDrawer = ({
         </button>
       </div>
 
-      {/* <div className="flex flex-col fixed"
-        style={{ top: "5px", right: "10px", color: "black", opacity: 0.8 }}
-      >
-        <button
-          onClick={() => {
-            setIsModalOpen(true);
-          }}
-          className={`flex flex-row w-fit h-fit px-4 py-2 gap-2 bg-gray-300 rounded-xl items-center justify-center text-sm hover:bg-gray-400 cursor-pointer ${(allSvg && allSvg?.length > 0 ) ? "" : "disabled"}`}
-        >
-          <img src="/assets/save.svg" alt="Save" className="w-4 h-4" />
-          <p>Salvar</p>
-        </button>
-      </div> */}
-
       <div className="flex flex-col fixed"
         style={{ top: "10px", right: "10px" }}
       >
@@ -193,18 +187,15 @@ const SegmentDrawer = ({
         </div>
       </div>}
 
+      {creatorId && 
       <CreateRouteModal 
         isOpen={isModalOpen} 
         isAdmin={new URL(window.location.href).searchParams.get("admin") === "1"}
-        creatorId={jwtDecode(new URL(window.location.href).searchParams.get("auth")!).sub!}
+        creatorId={creatorId}
         onCancel={() => setIsModalOpen(false)}
         onConfirm={async (newBoulder) => {
           // get the params wall_id and auth from the url
           const wall_id = new URL(window.location.href).searchParams.get("wall_id")!;
-          // const auth = new URL(window.location.href).searchParams.get("auth")!;
-
-          // // decode the jwt token
-          // const decoded = jwtDecode(auth);
 
           try {
             // make a post to http://localhost:3000/api/routes
@@ -216,7 +207,6 @@ const SegmentDrawer = ({
               body: JSON.stringify({
                 data: {
                   ...newBoulder,
-                  // creator_id: decoded.sub,
                   wall_id: wall_id,
                   coordinates: allSvg,
                   image_id: new URL(window.location.href).searchParams.get("image_id")!,
@@ -234,7 +224,7 @@ const SegmentDrawer = ({
             console.log(error);
           }
         }}
-      />
+      />}
     </section>
   );
 };
