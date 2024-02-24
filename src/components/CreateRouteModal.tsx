@@ -42,7 +42,7 @@ const boulderGrades = [
 ];
 
 const difficultyColorOptions = [
-  { label: "Branca", value: "#FFFFFF" },
+  { label: "Branca", value: "#ffffff" },
   { label: "Amarela", value: "#ffde00" },
   { label: "Verde", value: "#07b85d" },
   { label: "Azul", value: "#0095ff" },
