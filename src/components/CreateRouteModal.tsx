@@ -3,6 +3,7 @@ import { RouteDifficulty } from "./RouteDifficulty";
 import Select from 'react-select';
 import { supabase } from "../lib/initSupabase";
 import { jwtDecode } from "jwt-decode";
+import { InputSelectGeneric } from "./InputSelectGeneric";
 
 interface CreateRouteModalProps {
   isOpen: boolean;
@@ -184,17 +185,12 @@ const CreateRouteModal = ({ isOpen, creatorId, onConfirm, onCancel, isAdmin=fals
 
           <div className="mt-4">
             <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700">Classificação da via</label>
-            <select
-              id="difficulty"
-              name="difficulty"
+            <InputSelectGeneric
               value={newBoulder.difficulty}
-              onChange={handleChange}
-              className="mt-1 block w-full h-10 border border-gray-300 rounded-md shadow-sm p-2"
-            >
-              {boulderGrades.map((grade) => (
-                <option key={grade.name} value={grade.value}>{grade.name}</option>
-              ))}
-            </select>
+              onChange={(value) => setNewBoulder({ ...newBoulder, difficulty: value })}
+              items={boulderGrades.map(grade => grade.value)}
+              placeholder="Classifique o boulder/via"  
+            />
           </div>
 
           {/* input for name and description */}
@@ -284,7 +280,7 @@ const CreateRouteModal = ({ isOpen, creatorId, onConfirm, onCancel, isAdmin=fals
               />
             </div>
 
-            <div
+            {/* <div
               className="w-full"
               style={{
                 maxWidth: 125,
@@ -299,7 +295,7 @@ const CreateRouteModal = ({ isOpen, creatorId, onConfirm, onCancel, isAdmin=fals
                 onChange={handleChange}
                 className="mt-1 p-2 block w-full h-10 border border-gray-300 rounded-md shadow-sm"
               />
-            </div>
+            </div> */}
           </div>}
         </div>
 
